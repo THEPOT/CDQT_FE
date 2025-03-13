@@ -1,0 +1,322 @@
+Dưới đây là các yêu cầu chức năng giao diện cho các trang screen chính trong hệ thống đăng ký môn học. Các yêu cầu được trình bày dưới dạng danh sách có thứ tự, mỗi mục bắt đầu bằng số thứ tự, bao gồm mô tả chi tiết về các phần tử giao diện, tương tác người dùng và bố cục trang. Các yêu cầu này được thiết kế rõ ràng và cụ thể để hỗ trợ việc bắt đầu thiết kế giao diện.
+
+---
+
+### 1. Trang Thông Tin Sinh Viên
+   - **Mục đích**: Hiển thị thông tin cơ bản, học bổng, ngành học, kết quả học tập và học phí của sinh viên.
+   - **Bố cục trang**:
+     - **Header**: Hiển thị tên sinh viên và mã số sinh viên (MSSV).
+     - **Tabs hoặc Menu**: Các tab hoặc menu điều hướng cho các phần (Thông tin cá nhân, Học bổng, Ngành học, Kết quả học tập, Học phí).
+   - **Các phần tử giao diện**:
+     1. **Thông tin cá nhân**:
+        - Các trường hiển thị: MSSV, Họ tên, Email, Ngày nhập học, Trạng thái nhập học.
+        - Nút "Chỉnh sửa" (chỉ hiển thị cho Admin và Staff PĐT).
+     2. **Học bổng**:
+        - Danh sách học bổng/hỗ trợ tài chính (nếu có).
+        - Thông tin mỗi học bổng: Tên, Mô tả, Số tiền, Ngày cấp.
+     3. **Ngành học**:
+        - Hiển thị tên ngành học.
+        - Danh sách các môn học yêu cầu của ngành.
+     4. **Kết quả học tập**:
+        - Bảng điểm với các cột: Kỳ học, Mã môn, Tên môn, Số tín chỉ, Điểm, GPA kỳ, GPA tích lũy.
+        - Nút "Tải bảng điểm" (định dạng PDF hoặc Excel).
+     5. **Học phí**:
+        - Thông tin học phí theo kỳ: Kỳ học, Chính sách học phí, Tổng số tiền, Số tiền đã trả, Trạng thái thanh toán.
+   - **Tương tác người dùng**:
+     - Sinh viên chỉ có thể xem thông tin của mình.
+     - Admin và Staff PĐT có thể chỉnh sửa thông tin cá nhân.
+     - Nhân viên có thể lọc và xuất danh sách sinh viên theo tiêu chí (khóa, ngành, học bổng).
+
+---
+
+### 2. Trang Thông Tin Môn Học
+   - **Mục đích**: Cung cấp thông tin chi tiết về môn học như mã môn, tên môn, số tín chỉ, mô tả, điều kiện tiên quyết và đề cương.
+   - **Bố cục trang**:
+     - **Header**: Hiển thị tên môn học và mã môn.
+     - **Tabs hoặc Menu**: Các tab gồm Thông tin chung, Điều kiện tiên quyết, Đề cương.
+   - **Các phần tử giao diện**:
+     1. **Thông tin chung**:
+        - Hiển thị: Mã môn, Tên môn, Số tín chỉ, Mô tả, Tiêu chuẩn đầu ra.
+     2. **Điều kiện tiên quyết**:
+        - Danh sách các môn tiên quyết và đồng tiên quyết.
+     3. **Đề cương**:
+        - Nút "Tải đề cương" (định dạng PDF hoặc Word).
+   - **Tương tác người dùng**:
+     - Sinh viên và giảng viên có thể tìm kiếm và xem thông tin môn học.
+     - Admin và Staff PĐT có thể chỉnh sửa hoặc thêm môn học mới.
+     - Nhân viên PĐT có thể tải biểu mẫu đề cương.
+
+---
+
+### 3. Trang Đăng Ký Môn Học
+   - **Mục đích**: Cho phép sinh viên đăng ký môn học, xem lịch học và nhận cảnh báo khi có lỗi.
+   - **Bố cục trang**:
+     - **Header**: Hiển thị kỳ học hiện tại.
+     - **Sidebar**: Danh sách môn học đã đăng ký.
+     - **Main Content**: Danh sách môn học có thể đăng ký.
+   - **Các phần tử giao diện**:
+     1. **Danh sách môn học có thể đăng ký**:
+        - Bảng với các cột: Mã môn, Tên môn, Giảng viên, Lịch học, Phòng học, Sĩ số.
+        - Nút "Đăng ký" cho từng môn.
+     2. **Danh sách môn học đã đăng ký**:
+        - Bảng tương tự như trên, với nút "Hủy đăng ký".
+     3. **Cảnh báo**:
+        - Thông báo khi có lỗi: trùng môn, chưa thỏa điều kiện tiên quyết, trùng lịch, vượt số tín chỉ.
+   - **Tương tác người dùng**:
+     - Sinh viên có thể đăng ký hoặc hủy đăng ký môn học.
+     - Admin và Staff PĐT có thể điều chỉnh đăng ký của sinh viên.
+     - Nhân viên PĐT có thể thiết lập kỳ học và mở cổng đăng ký.
+
+---
+
+### 4. Trang Đánh Giá Giữa Kỳ
+   - **Mục đích**: Cho phép giảng viên nhập đánh giá giữa kỳ cho sinh viên.
+   - **Bố cục trang**:
+     - **Header**: Hiển thị tên môn học và kỳ học.
+     - **Main Content**: Danh sách sinh viên trong lớp.
+   - **Các phần tử giao diện**:
+     1. **Danh sách sinh viên**:
+        - Bảng với các cột: MSSV, Họ tên, Tình trạng, Đề xuất.
+        - Trường nhập liệu cho "Tình trạng" và "Đề xuất".
+     2. **Nút "Lưu đánh giá"**: Lưu toàn bộ đánh giá đã nhập.
+   - **Tương tác người dùng**:
+     - Giảng viên nhập và lưu đánh giá giữa kỳ.
+     - Sinh viên có thể xem kết quả đánh giá của mình.
+     - Nhân viên PĐT có thể mở cổng đánh giá và tổng hợp kết quả.
+
+---
+
+### 5. Trang Kết Quả Học Tập
+   - **Mục đích**: Hiển thị bảng điểm chi tiết của sinh viên theo từng kỳ học.
+   - **Bố cục trang**:
+     - **Header**: Hiển thị tên sinh viên và MSSV.
+     - **Main Content**: Bảng điểm theo kỳ học.
+   - **Các phần tử giao diện**:
+     1. **Bảng điểm**:
+        - Các cột: Kỳ học, Mã môn, Tên môn, Số tín chỉ, Điểm, GPA kỳ, GPA tích lũy.
+     2. **Nút "Tải bảng điểm"**: Xuất file định dạng PDF hoặc Excel.
+   - **Tương tác người dùng**:
+     - Sinh viên và giảng viên có thể xem bảng điểm.
+     - Nhân viên PĐT có thể nhập điểm và xuất danh sách sinh viên theo GPA hoặc môn không đạt.
+
+---
+
+### 6. Trang Lộ Trình Học Tập
+   - **Mục đích**: Hiển thị tiến độ học tập của sinh viên dựa trên số tín chỉ và môn học.
+   - **Bố cục trang**:
+     - **Header**: Hiển thị tên sinh viên và ngành học.
+     - **Tabs hoặc Menu**: Tiến độ theo tín chỉ, Tiến độ theo môn học.
+   - **Các phần tử giao diện**:
+     1. **Tiến độ theo tín chỉ**:
+        - Hiển thị: Số tín chỉ yêu cầu, đã hoàn tất, chưa hoàn tất.
+     2. **Tiến độ theo môn học**:
+        - Danh sách môn học yêu cầu với trạng thái (đã hoàn tất/chưa hoàn tất).
+     3. **Nút "Xuất file tiến độ"**: Xuất file định dạng PDF hoặc Excel.
+   - **Tương tác người dùng**:
+     - Sinh viên và nhân viên có thể xem và xuất file tiến độ.
+     - Admin và Staff PĐT có thể điều chỉnh thông tin tiến độ.
+
+---
+
+### 7. Trang Dịch Vụ
+   - **Mục đích**: Cho phép sinh viên gửi yêu cầu dịch vụ như chứng nhận, bảng điểm, nghỉ học, v.v.
+   - **Bố cục trang**:
+     - **Header**: Danh sách các loại yêu cầu.
+     - **Main Content**: Form gửi yêu cầu và danh sách yêu cầu đã gửi.
+   - **Các phần tử giao diện**:
+     1. **Form gửi yêu cầu**:
+        - Dropdown chọn loại yêu cầu.
+        - Textarea nhập chi tiết yêu cầu.
+        - Nút "Gửi yêu cầu".
+     2. **Danh sách yêu cầu đã gửi**:
+        - Bảng với các cột: Loại yêu cầu, Ngày gửi, Trạng thái, Chi tiết.
+   - **Tương tác người dùng**:
+     - Sinh viên gửi yêu cầu và theo dõi tiến độ.
+     - Nhân viên PĐT xử lý và cập nhật kết quả.
+
+---
+
+### 8. Trang Khảo Sát Môn Học Cuối Kỳ
+   - **Mục đích**: Cho phép sinh viên đánh giá môn học và giảng viên cuối kỳ.
+   - **Bố cục trang**:
+     - **Header**: Hiển thị tên môn học và kỳ học.
+     - **Main Content**: Form khảo sát.
+   - **Các phần tử giao diện**:
+     1. **Form khảo sát**:
+        - Các câu hỏi đánh giá (ví dụ: thang điểm 1-5).
+        - Textarea nhập ý kiến tự do.
+        - Nút "Gửi khảo sát".
+   - **Tương tác người dùng**:
+     - Sinh viên thực hiện khảo sát ẩn danh.
+     - Giảng viên và nhân viên PĐT xem kết quả tổng hợp.
+
+---
+
+Các yêu cầu trên cung cấp mô tả chi tiết và cụ thể về giao diện, bố cục, và tương tác người dùng cho từng trang screen. Với thông tin này, bạn có thể bắt đầu thiết kế giao diện một cách rõ ràng và hiệu quả, đáp ứng đầy đủ nhu cầu của các nhóm người dùng (Sinh viên, Giảng viên, Admin, Nhân viên PĐT).
+=========================================================
+STUDENT INFORMATION – THÔNG TIN SINH VIÊN
+=========================================================
+
+1. GIỚI THIỆU CHUNG
+-------------------
+- Hạng mục này bao gồm:
+  • Thông tin đăng ký nhập học (Admission data)
+  • Thông tin học phí (Tuition) và học bổng/hỗ trợ tài chính (Scholarship/Financial Aids)
+  • Thông tin chương trình đào tạo, ngành học (Program and Courses)
+  • Kết quả học tập (Transcript) – dạng tóm tắt
+- Cho phép quản lý, cập nhật, xét duyệt quyền xóa hoặc sửa thông tin sinh viên.
+- Người dùng (User) có thể xem hoặc chỉnh sửa (tùy quyền hạn).
+
+2. NỘI DUNG CHI TIẾT
+--------------------
+2.1 Thông tin đăng ký nhập học
+- Bao gồm các trường thông tin cá nhân: họ tên, ngày sinh, địa chỉ, số điện thoại, email, v.v.
+- Thông tin ngành học, khóa học, thời gian nhập học, v.v.
+- Được quản lý bởi Phòng Đào Tạo (PĐT), cập nhật khi sinh viên làm thủ tục nhập học.
+
+2.2 Chính sách học phí (Tuition)
+- Cho phép quản lý:
+  • Mức học phí theo tín chỉ, theo năm học, theo chương trình.
+  • Thời hạn và phương thức thanh toán.
+- Kết nối với bộ phận Kế toán để ghi nhận tình trạng đóng học phí, phát hành hóa đơn.
+
+2.3 Chính sách học bổng/hỗ trợ tài chính (Scholarship/Financial Aids)
+- Lưu trữ thông tin:
+  • Loại học bổng, giá trị, tiêu chí xét duyệt.
+  • Danh sách sinh viên nhận học bổng, kết quả tái xét học bổng (nếu có).
+- Kết nối với Phòng CTSV (Công tác sinh viên) để cập nhật kết quả xét học bổng.
+
+2.4 Program and Courses – Ngành học, danh mục môn học yêu cầu
+- Thông tin về chương trình đào tạo, ngành học mà sinh viên đang theo.
+- Danh mục các môn học bắt buộc và môn tự chọn cho từng ngành.
+
+2.5 Transcript – Kết quả học tập
+- Hiển thị tóm tắt bảng điểm, GPA (nếu cần).
+- Liên kết với phân hệ Transcript chi tiết.
+
+3. CÁC VAI TRÒ (ACTOR) VÀ QUYỀN HẠN
+----------------------------------
+- Admin:
+  • Quản lý, điều chỉnh nội dung chung (chính sách học phí, học bổng, v.v.)
+  • Xét duyệt quyền xóa hoặc sửa thông tin sinh viên (nếu có quy trình phê duyệt).
+- Sinh viên:
+  • Xem thông tin cá nhân, kết quả học tập, học phí, học bổng.
+  • Cập nhật một số trường thông tin liên hệ (nếu được phép).
+- Giảng viên:
+  • Thông thường chỉ xem thông tin sinh viên (phục vụ cố vấn học tập hoặc kiểm tra danh sách).
+- Nhân viên (PĐT, Kế toán, CTSV):
+  • PĐT: Nhập dữ liệu, quản lý thông tin ngành học, cập nhật kết quả xét học bổng.
+  • Kế toán: Theo dõi, ghi nhận tình trạng đóng học phí.
+  • CTSV: Quản lý kết quả học bổng, xử lý các vấn đề liên quan đến sinh viên.
+  • Tất cả nhân viên: Xem thông tin sinh viên, lọc/xuất danh sách theo khóa, ngành, loại học bổng.
+
+4. CHỨC NĂNG CHI TIẾT
+---------------------
+4.1 Nhập và Quản lý thông tin sinh viên
+- Tạo hồ sơ sinh viên mới, cập nhật khi có thay đổi.
+- Quản lý lịch sử chỉnh sửa (nếu cần).
+
+4.2 Quản lý Học phí và Học bổng
+- Tạo/cập nhật chính sách học phí (mức, thời hạn, phương thức thanh toán).
+- Quản lý danh sách học bổng, tiêu chí, kết quả xét.
+
+4.3 Lọc và Xuất danh sách sinh viên
+- Tìm kiếm, lọc sinh viên theo khóa, ngành, tình trạng đóng học phí, loại học bổng, v.v.
+- Xuất file Excel/PDF phục vụ báo cáo.
+
+4.4 Xóa/Sửa thông tin
+- Thường chỉ Admin hoặc PĐT được phép xóa dữ liệu sinh viên.
+- Có thể yêu cầu quy trình phê duyệt để tránh mất dữ liệu quan trọng.
+
+5. GHI CHÚ
+----------
+- Bổ sung trường thông tin chi tiết (họ tên, ngày sinh, địa chỉ, email, ngành, khóa, tình trạng học phí, học bổng, v.v.).
+- Tích hợp với các phân hệ khác như: Course Registration (để biết môn đăng ký), Transcript (để lấy điểm).
+- Phân quyền hiển thị dữ liệu nhạy cảm chỉ cho người có thẩm quyền.
+
+
+=========================================================
+COURSE REGISTRATION – ĐĂNG KÝ MÔN HỌC
+=========================================================
+
+1. GIỚI THIỆU CHUNG
+-------------------
+- Cho phép sinh viên đăng ký môn học theo kỳ, quản lý lịch học, giảng viên, phòng học.
+- Tự động tính học phí dựa trên số tín chỉ.
+- Phát hiện các lỗi đăng ký (trùng lịch, chưa đạt điều kiện tiên quyết, vượt tín chỉ, v.v.).
+- Xuất kết quả đăng ký, danh sách lớp, thống kê sĩ số.
+
+2. NỘI DUNG CHI TIẾT
+--------------------
+2.1 Course – Thông tin môn học
+- Lấy từ “Course Finder”: mã môn, tên môn, số tín chỉ, mô tả, v.v.
+
+2.2 Schedule – Lịch học
+- Phòng Đào Tạo (PĐT) thiết lập lịch học, giảng viên, phòng học theo từng kỳ.
+
+2.3 Professor – Giảng viên
+- Thông tin giảng viên dạy môn đó trong kỳ, lịch dạy cụ thể.
+
+2.4 Classroom – Phòng học
+- Danh sách phòng học, sức chứa, tình trạng trang thiết bị.
+
+2.5 Học phí liên quan đến đăng ký
+- Tự động tính học phí dựa trên số tín chỉ mà sinh viên đăng ký.
+- Có thể hiển thị học bổng nếu sinh viên đang được miễn/giảm.
+
+3. CÁC VAI TRÒ (ACTOR) VÀ QUYỀN HẠN
+----------------------------------
+- Admin:
+  • Giám sát, hỗ trợ PĐT trong việc mở/đóng cổng đăng ký.
+- Sinh viên:
+  • Đăng ký môn học trong khoảng thời gian cho phép.
+  • Xem kết quả đăng ký, lịch học, học phí.
+  • Nhận thông báo lỗi nếu đăng ký sai quy định.
+- Giảng viên:
+  • Xem danh sách sinh viên đăng ký vào lớp.
+  • Theo dõi sĩ số, hỗ trợ kiểm soát lớp.
+- Nhân viên:
+  • PĐT:
+    - Thiết lập kỳ học, danh sách môn, thời khóa biểu.
+    - Mở cổng đăng ký môn.
+    - Tổng hợp, xuất báo cáo đăng ký theo kỳ, theo môn.
+  • Kế toán:
+    - Thiết lập hạn đóng học phí.
+    - Ghi nhận tình trạng đóng học phí.
+  • Các nhân viên khác (nếu có):
+    - Phối hợp xử lý các vấn đề liên quan đến đăng ký môn.
+
+4. CHỨC NĂNG CHI TIẾT
+---------------------
+4.1 Mở/Quản lý cổng đăng ký
+- Xác định thời gian mở/đóng, số lượt chỉnh sửa tối đa.
+- Quản lý các môn học được mở trong kỳ.
+
+4.2 Đăng ký môn học
+- Giao diện hiển thị danh sách môn có sẵn, thông tin lịch học, giảng viên.
+- Kiểm tra điều kiện tiên quyết, trùng lịch, giới hạn tín chỉ.
+- Tự động tính học phí, thông báo nếu sinh viên có học bổng.
+
+4.3 Cảnh báo và Thông báo
+- Thông báo lỗi khi vi phạm điều kiện (trùng lịch, thiếu điều kiện tiên quyết, v.v.).
+- Xác nhận thành công, gửi email/notification cho sinh viên với lịch học chính thức.
+
+4.4 Báo cáo và Thống kê
+- Xuất danh sách lớp, số lượng sinh viên đăng ký.
+- Thống kê sĩ số theo ngành, khóa, biểu đồ phân bố.
+- Tính sĩ số trung bình của từng chương trình.
+
+4.5 Quản lý Học phí trong Đăng ký
+- Kết nối với phân hệ Kế toán để xác nhận thanh toán.
+- Cảnh báo nếu sinh viên chưa đóng học phí hoặc quá hạn.
+- Khóa chức năng đăng ký nếu vi phạm chính sách tài chính (tùy quy định).
+
+4.6 Chỉnh sửa thông tin đăng ký
+- Cho phép PĐT hoặc Admin can thiệp chỉnh sửa đăng ký cho các trường hợp đặc biệt.
+- Sinh viên có thể Add/Drop trong thời gian quy định (nếu chính sách cho phép).
+
+5. GHI CHÚ
+----------
+- Hệ thống phải đảm bảo tải được khi nhiều sinh viên đăng ký cùng lúc (tránh quá tải).
+- Tích hợp với các phân hệ: Course Finder (lấy dữ liệu môn), Student Information (lấy thông tin học bổng, khóa học), Transcript (kiểm tra môn đã qua).
+- Cần cơ chế kiểm soát chặt chẽ để tránh sai sót trong quy trình đăng ký.
