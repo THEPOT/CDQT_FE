@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { RiSearchLine, RiNotification3Line, RiMailLine, RiUserLine, RiLockPasswordLine, RiLoginCircleLine, RiLogoutBoxLine } from 'react-icons/ri';
 import { Link } from 'react-router-dom';
 
@@ -6,6 +6,7 @@ function Navbar({ userRole = 'Student' }) { // Giả định userRole được t
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [userData, setUserData] = useState(null);
 
   // Thông báo mẫu, có thể thay bằng dữ liệu thực từ API
   const notifications = [
@@ -53,6 +54,13 @@ function Navbar({ userRole = 'Student' }) { // Giả định userRole được t
       { path: '/service-management', label: 'Quản lý dịch vụ' },
     ],
   };
+
+  useEffect(() => {
+    const userFromStorage = localStorage.getItem('user');
+    if (userFromStorage) {
+      setUserData(JSON.parse(userFromStorage));
+    }
+  }, []);
 
   return (
     <div className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4">
@@ -182,13 +190,19 @@ function Navbar({ userRole = 'Student' }) { // Giả định userRole được t
             }}
           >
             <img
-              src="https://scontent.fsgn2-11.fna.fbcdn.net/v/t39.30808-6/476330707_122104752284750484_5215047765037178064_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeGcMEnwVDGNYm6BMBSkqdiHc26spGUkh89zbqykZSSHz0vnM8QtB7XTzJe98t0fMX3FMxnmXouQ4lG1D7Y67UAm&_nc_ohc=KJmesXmESXMQ7kNvgF3vHtn&_nc_oc=AdgXn4CnGa15fpCoWR55QcmgSNRhXWDDpm6eNGnOOP8rIFjeMdrMmWBMwT2LPcjPVdE&_nc_zt=23&_nc_ht=scontent.fsgn2-11.fna&_nc_gid=A8g48XRSR3rS-ycViEn3qXZ&oh=00_AYCe0Y_bKPnXE3WT6KEmfhnz695niRsHt_YnLJFGBvBrSQ&oe=67BBDBE8"
+              src=""
               alt="Profile"
               className="w-8 h-8 rounded-full"
             />
             <div className="flex flex-col text-left">
-              <span className="font-medium text-text">PaneWay</span>
-              <span className="text-sm text-gray-500">{userRole}</span>
+              <span className="font-medium text-text">
+                {userData?.name || 'Guest'}
+              </span>
+              {userData?.role && (
+                <span className="text-sm text-gray-500">
+                  ({userData.role})
+                </span>
+              )}
             </div>
           </button>
           {showProfile && (
