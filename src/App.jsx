@@ -1,22 +1,22 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
-import About from "./pages/About";
 import Login from "./pages/Login";
-import StudentInfo from './pages/StudentInfo';
-import CourseRegistration from './pages/CourseRegistration';
-import Transcript from './pages/Transcript';
+import StudentInfo from "./pages/StudentInfo";
+import CourseRegistration from "./pages/CourseRegistration";
+import Transcript from "./pages/Transcript";
+import StudentInformationManagement from "./pages/StudentInformationManagement"; // Add import
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Layout } from "./components/Layout";
 import GuestRoute from "./components/GuestRoute";
 import "./App.css";
 
-
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          {/* Route công khai */}
           <Route
             path="/login"
             element={
@@ -25,54 +25,56 @@ function App() {
               </GuestRoute>
             }
           />
+
+          {/* Route được bảo vệ */}
           <Route
             path="/"
             element={
-              <Layout>
-                <ProtectedRoute>
+              <ProtectedRoute>
+                <Layout>
                   <Home />
-                </ProtectedRoute>
-              </Layout>
-            }
-          />
-          <Route
-            path="/about"
-            element={
-              <Layout>
-                <ProtectedRoute>
-                  <About />
-                </ProtectedRoute>
-              </Layout>
+                </Layout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/student-info"
             element={
-              <Layout>
-             
+              <ProtectedRoute>
+                <Layout>
                   <StudentInfo />
-           
-              </Layout>
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/student-management"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <StudentInformationManagement />
+                </Layout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/course-registration"
             element={
-              <Layout>
-     
+              <ProtectedRoute>
+                <Layout>
                   <CourseRegistration />
-
-              </Layout>
+                </Layout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/transcript"
             element={
-              <Layout>
-
+              <ProtectedRoute>
+                <Layout>
                   <Transcript />
-
-              </Layout>
+                </Layout>
+              </ProtectedRoute>
             }
           />
         </Routes>
