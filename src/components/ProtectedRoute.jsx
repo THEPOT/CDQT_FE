@@ -1,22 +1,34 @@
-// src/components/ProtectedRoute.jsx
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
-import { useEffect } from "react";
 
-// eslint-disable-next-line react/prop-types
 export const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem("access_token");
-  const navigate = useNavigate();
-
+  const [isValidToken, setIsValidToken] = useState(true);
+  
   useEffect(() => {
-    if (!token) return;
-    const decodedData = jwtDecode(token);
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      setIsValidToken(false);
+      return;
+    }
 
-    if (!decodedData) return;
+    try {
+      jwtDecode(token);
+      setIsValidToken(true);
+    } catch (error) {
+      console.error("Token validation error:", error);
+      setIsValidToken(false);
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("user");
+    }
+  }, []);
 
-  }, [token, navigate]);
-
-  if (!token) return <Navigate to="/login" replace />;
+  const token = localStorage.getItem("access_token");
+  
+  if (!token || !isValidToken) {
+    return <Navigate to="/login" replace />;
+  }
 
   return children;
 };
