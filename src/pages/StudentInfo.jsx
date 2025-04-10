@@ -299,12 +299,12 @@ function ProgramInfo({ data }) {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {(data.courses || []).map((course, index) => (
-                <tr key={course.code ? `course-${course.code}` : `course-${index}`}>
+                <tr key={course.courseCode ? `course-${course.courseCode}` : `course-${index}`}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {course.code || '-'}
+                    {course.courseCode || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {course.name || '-'}
+                    {course.courseName || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {course.credits || '-'}

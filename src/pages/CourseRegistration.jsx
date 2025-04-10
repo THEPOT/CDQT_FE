@@ -1,21 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { RiFilter2Line, RiSearchLine, RiCalendarLine, RiTimeLine, RiMapPin2Line, RiUser2Line } from 'react-icons/ri';
+import { getCourseAPI } from '../apis/courseAPI';
 
 function CourseRegistration() {
   const [selectedCourses, setSelectedCourses] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [courses, setCourses] = useState([]);
   const [filters, setFilters] = useState({
     department: '',
     credits: '',
     weekday: ''
   });
 
+  useEffect(() => {
+    fetchCourses();
+  }, []);
+
+  const fetchCourses = async () => {
+    try {
+      const response = await getCourseAPI();
+      setCourses(response.data);
+    } catch (error) {
+      console.error('Error fetching course data:', error);
+    }
+  };
+
   const handleRegisterCourse = (course) => {
     setSelectedCourses([...selectedCourses, course]);
   };
 
   const handleRemoveCourse = (courseId) => {
-    setSelectedCourses(selectedCourses.filter(c => c.id !== courseId));
+    setSelectedCourses(selectedCourses.filter(c => c.courseCode !== courseId));
   };
 
   return (
@@ -26,9 +41,9 @@ function CourseRegistration() {
           <p className="text-gray-600">Học kỳ 1 - Năm học 2024-2025</p>
         </div>
         <div className="text-right">
-          <p className="text-sm text-gray-600">Số tín chỉ đã đăng ký</p>
+          <p className="text-sm text-gray-600">Số môn đã đăng ký</p>
           <p className="text-2xl font-bold text-blue-600">
-            {selectedCourses.reduce((sum, course) => sum + course.credits, 0)}/24
+            {selectedCourses.length}/8
           </p>
         </div>
       </div>
@@ -97,46 +112,23 @@ function CourseRegistration() {
 
           {/* Available Courses */}
           <div className="bg-white rounded-xl shadow-sm divide-y">
-            {[
-              {
-                id: 'CS101',
-                name: 'Nhập môn lập trình',
-                code: 'CS101',
-                credits: 3,
-                schedule: 'Thứ 2 (7:30 - 9:30)',
-                room: 'A101',
-                instructor: 'Nguyễn Văn A',
-                enrolled: 45,
-                capacity: 50
-              },
-              {
-                id: 'CS102',
-                name: 'Cấu trúc dữ liệu và giải thuật',
-                code: 'CS102',
-                credits: 4,
-                schedule: 'Thứ 3 (9:45 - 11:45)',
-                room: 'B203',
-                instructor: 'Trần Thị B',
-                enrolled: 38,
-                capacity: 45
-              }
-            ].map((course) => (
-              <div key={course.id} className="p-6 hover:bg-gray-50">
+            {courses.map((course) => (
+              <div key={course.courseCode} className="p-6 hover:bg-gray-50">
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="text-lg font-medium text-gray-900">
-                      {course.name}
+                      {course.courseName}
                     </h3>
                     <p className="text-sm text-gray-500">
-                      Mã môn: {course.code} • {course.credits} tín chỉ
+                      Mã môn: {course.courseCode} • Lớp: {course.className}
                     </p>
                   </div>
                   <button
                     onClick={() => handleRegisterCourse(course)}
-                    disabled={selectedCourses.some(c => c.id === course.id)}
+                    disabled={selectedCourses.some(c => c.courseCode === course.courseCode)}
                     className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
                   >
-                    {selectedCourses.some(c => c.id === course.id)
+                    {selectedCourses.some(c => c.courseCode === course.courseCode)
                       ? 'Đã đăng ký'
                       : 'Đăng ký'
                     }
@@ -146,26 +138,11 @@ function CourseRegistration() {
                 <div className="mt-4 grid grid-cols-2 gap-4">
                   <div className="flex items-center gap-2 text-sm text-gray-500">
                     <RiCalendarLine className="flex-shrink-0" />
-                    <span>{course.schedule}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
-                    <RiMapPin2Line className="flex-shrink-0" />
-                    <span>Phòng {course.room}</span>
+                    <span>{course.schedule === "Not scheduled" ? "Chưa có lịch học" : course.schedule}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-500">
                     <RiUser2Line className="flex-shrink-0" />
-                    <span>{course.instructor}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
-                    <span>Sĩ số: {course.enrolled}/{course.capacity}</span>
-                    <div className="w-24 h-2 bg-gray-200 rounded-full">
-                      <div
-                        className="h-2 bg-blue-600 rounded-full"
-                        style={{
-                          width: `${(course.enrolled / course.capacity) * 100}%`
-                        }}
-                      />
-                    </div>
+                    <span>Sĩ số: {course.availableSlots}/{course.capacity}</span>
                   </div>
                 </div>
               </div>
@@ -174,88 +151,34 @@ function CourseRegistration() {
         </div>
 
         {/* Selected Courses */}
-        <div className="space-y-6">
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">
-              Môn học đã đăng ký
-            </h2>
-            <div className="space-y-4">
-              {selectedCourses.map((course) => (
-                <div
-                  key={course.id}
-                  className="p-4 border border-gray-200 rounded-lg"
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">
+            Môn học đã chọn
+          </h2>
+          <div className="space-y-4">
+            {selectedCourses.map((course) => (
+              <div
+                key={course.courseCode}
+                className="flex justify-between items-center p-4 border rounded-lg"
+              >
+                <div>
+                  <h3 className="font-medium text-gray-900">{course.courseName}</h3>
+                  <p className="text-sm text-gray-500">Mã môn: {course.courseCode}</p>
+                </div>
+                <button
+                  onClick={() => handleRemoveCourse(course.courseCode)}
+                  className="text-red-600 hover:text-red-700"
                 >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-medium text-gray-900">
-                        {course.name}
-                      </h3>
-                      <p className="text-sm text-gray-500">
-                        {course.credits} tín chỉ
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => handleRemoveCourse(course.id)}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      Hủy
-                    </button>
-                  </div>
-                  <div className="mt-2 text-sm text-gray-500">
-                    <p className="flex items-center gap-2">
-                      <RiCalendarLine />
-                      {course.schedule}
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <RiMapPin2Line />
-                      Phòng {course.room}
-                    </p>
-                  </div>
-                </div>
-              ))}
-              {selectedCourses.length === 0 && (
-                <p className="text-center text-gray-500 py-4">
-                  Chưa có môn học nào được chọn
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">
-              Học phí dự kiến
-            </h2>
-            <div className="space-y-2">
-              {selectedCourses.map((course) => (
-                <div
-                  key={course.id}
-                  className="flex justify-between text-sm"
-                >
-                  <span>{course.name}</span>
-                  <span>{course.credits * 850000} VNĐ</span>
-                </div>
-              ))}
-              <div className="border-t pt-2 mt-2">
-                <div className="flex justify-between font-medium">
-                  <span>Tổng cộng</span>
-                  <span>
-                    {selectedCourses.reduce(
-                      (sum, course) => sum + course.credits * 850000,
-                      0
-                    ).toLocaleString()}{' '}
-                    VNĐ
-                  </span>
-                </div>
+                  Xóa
+                </button>
               </div>
-            </div>
+            ))}
+            {selectedCourses.length === 0 && (
+              <p className="text-center text-gray-500">
+                Chưa có môn học nào được chọn
+              </p>
+            )}
           </div>
-
-          <button
-            className="w-full py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700 font-medium"
-            disabled={selectedCourses.length === 0}
-          >
-            Xác nhận đăng ký
-          </button>
         </div>
       </div>
     </div>
