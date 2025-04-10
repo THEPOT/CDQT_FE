@@ -1,95 +1,101 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tab } from '@headlessui/react';
 import { RiUserLine, RiBookOpenLine, RiMoneyDollarCircleLine, RiFileList3Line } from 'react-icons/ri';
+import { getProfileAPI } from '../apis/profileAPI';
 
 function StudentInfo() {
-  const studentData = {
+  const [studentData, setStudentData] = useState({
     personal: {
-      studentId: '2023001',
-      fullName: 'Nguyễn Văn A',
-      email: 'vana@example.com',
-      phone: '0901234567',
-      birthDate: '2000-01-01',
-      address: 'Hồ Chí Minh',
-      admissionDate: '2023-09-01',
-      status: 'Đang học'
+      studentId: '',
+      fullName: '',
+      email: '',
+      phoneNumber: '',
+      dateOfBirth: '',
+      address: '',
+      enrollmentDate: '',
+      status: 'Đang học',
+      imageUrl: ''
     },
     scholarship: {
-      current: {
-        name: 'Học bổng khuyến khích học tập',
-        amount: 5000000,
-        type: 'merit',
-        startDate: '2024-01-01',
-        endDate: '2024-06-30'
-      },
-      history: [
-        {
-          name: 'Học bổng tân sinh viên',
-          amount: 3000000,
-          type: 'admission',
-          startDate: '2023-09-01',
-          endDate: '2023-12-31'
-        }
-      ]
+      current: null,
+      history: []
     },
     program: {
-      name: 'Khoa học máy tính',
-      code: 'CS',
-      totalCredits: 130,
-      completedCredits: 30,
-      courses: [
-        {
-          code: 'CS101',
-          name: 'Nhập môn lập trình',
-          credits: 3,
-          status: 'completed',
-          grade: 'A'
-        },
-        {
-          code: 'CS102',
-          name: 'Cấu trúc dữ liệu',
-          credits: 4,
-          status: 'in_progress'
-        }
-      ]
+      name: '',
+      code: '',
+      totalCredits: 0,
+      completedCredits: 0,
+      courses: []
     },
     tuition: {
-      currentTerm: {
-        term: 'HK2 2023-2024',
-        amount: 15000000,
-        paid: 15000000,
-        status: 'paid',
-        dueDate: '2024-02-15'
-      },
-      history: [
-        {
-          term: 'HK1 2023-2024',
-          amount: 15000000,
-          paid: 15000000,
-          status: 'paid',
-          dueDate: '2023-09-15'
-        }
-      ]
+      currentTerm: null,
+      history: []
     }
-  };
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await getProfileAPI();
+        const profileData = response.data;
+        
+        setStudentData({
+          personal: {
+            studentId: profileData.mssv || '',
+            fullName: profileData.fullName || '',
+            email: profileData.email || '',
+            phoneNumber: profileData.phoneNumber || '',
+            dateOfBirth: profileData.dateOfBirth || '',
+            address: profileData.address || '',
+            enrollmentDate: profileData.enrollmentDate || '',
+            status: profileData.status || 'Đang học',
+            imageUrl: profileData.imageUrl || ''
+          },
+          scholarship: {
+            current: profileData.currentScholarship || null,
+            history: profileData.scholarshipHistory || []
+          },
+          program: {
+            name: profileData.majorInfo?.majorCode || '',
+            code: profileData.majorInfo?.majorId || '',
+            totalCredits: profileData.majorInfo?.requiredCredits || 0,
+            completedCredits: profileData.majorInfo?.completedCredits || 0,
+            courses: profileData.majorInfo?.courses || []
+          },
+          tuition: {
+            currentTerm: profileData.currentTuition || null,
+            history: profileData.tuitionHistory || []
+          }
+        });
+      } catch (error) {
+        console.error('Error fetching profile data:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const tabs = [
     {
+      id: 'personal',
       name: 'Thông tin cá nhân',
       icon: RiUserLine,
       content: <PersonalInfo data={studentData.personal} />
     },
     {
+      id: 'scholarship',
       name: 'Học bổng',
       icon: RiMoneyDollarCircleLine,
       content: <ScholarshipInfo data={studentData.scholarship} />
     },
     {
+      id: 'program',
       name: 'Ngành học',
       icon: RiBookOpenLine,
       content: <ProgramInfo data={studentData.program} />
     },
     {
+      id: 'tuition',
       name: 'Học phí',
       icon: RiFileList3Line,
       content: <TuitionInfo data={studentData.tuition} />
@@ -102,14 +108,22 @@ function StudentInfo() {
       <div className="bg-white rounded-xl shadow-sm p-6">
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-            <RiUserLine className="w-8 h-8 text-blue-600" />
+            {studentData.personal.imageUrl ? (
+              <img 
+                src={studentData.personal.imageUrl} 
+                alt="Profile" 
+                className="w-16 h-16 rounded-full object-cover"
+              />
+            ) : (
+              <RiUserLine className="w-8 h-8 text-blue-600" />
+            )}
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              {studentData.personal.fullName}
+              {studentData.personal.fullName || 'N/A'}
             </h1>
             <p className="text-gray-600">
-              MSSV: {studentData.personal.studentId} • {studentData.program.name}
+              MSSV: {studentData.personal.studentId || 'N/A'} • {studentData.program.name || 'N/A'}
             </p>
           </div>
         </div>
@@ -121,7 +135,7 @@ function StudentInfo() {
           <Tab.List className="flex p-2 space-x-2 border-b">
             {tabs.map((tab) => (
               <Tab
-                key={tab.name}
+                key={tab.id}
                 className={({ selected }) =>
                   `flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                     selected
@@ -136,8 +150,8 @@ function StudentInfo() {
             ))}
           </Tab.List>
           <Tab.Panels className="p-6">
-            {tabs.map((tab, idx) => (
-              <Tab.Panel key={idx}>{tab.content}</Tab.Panel>
+            {tabs.map((tab) => (
+              <Tab.Panel key={tab.id}>{tab.content}</Tab.Panel>
             ))}
           </Tab.Panels>
         </Tab.Group>
@@ -148,27 +162,27 @@ function StudentInfo() {
 
 function PersonalInfo({ data }) {
   const fields = [
-    { label: 'Mã số sinh viên', value: data.studentId },
-    { label: 'Họ và tên', value: data.fullName },
-    { label: 'Email', value: data.email },
-    { label: 'Số điện thoại', value: data.phone },
-    { label: 'Ngày sinh', value: new Date(data.birthDate).toLocaleDateString('vi-VN') },
-    { label: 'Địa chỉ', value: data.address },
-    { label: 'Ngày nhập học', value: new Date(data.admissionDate).toLocaleDateString('vi-VN') },
-    { label: 'Trạng thái', value: data.status }
+    { id: 'studentId', label: 'Mã số sinh viên', value: data.studentId },
+    { id: 'fullName', label: 'Họ và tên', value: data.fullName },
+    { id: 'email', label: 'Email', value: data.email },
+    { id: 'phoneNumber', label: 'Số điện thoại', value: data.phoneNumber },
+    { id: 'dateOfBirth', label: 'Ngày sinh', value: data.dateOfBirth ? new Date(data.dateOfBirth).toLocaleDateString('vi-VN') : 'N/A' },
+    { id: 'address', label: 'Địa chỉ', value: data.address },
+    { id: 'enrollmentDate', label: 'Ngày nhập học', value: data.enrollmentDate ? new Date(data.enrollmentDate).toLocaleDateString('vi-VN') : 'N/A' },
+    { id: 'status', label: 'Trạng thái', value: data.status }
   ];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {fields.map((field) => (
-        <div key={field.label}>
+        <div key={field.id}>
           <label className="block text-sm font-medium text-gray-700">
             {field.label}
           </label>
           <input
             type="text"
             readOnly
-            value={field.value}
+            value={field.value || 'N/A'}
             className="mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           />
         </div>
@@ -284,16 +298,16 @@ function ProgramInfo({ data }) {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {data.courses.map((course) => (
-                <tr key={course.code}>
+              {(data.courses || []).map((course, index) => (
+                <tr key={course.code ? `course-${course.code}` : `course-${index}`}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {course.code}
+                    {course.code || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {course.name}
+                    {course.name || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {course.credits}
+                    {course.credits || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
@@ -311,6 +325,13 @@ function ProgramInfo({ data }) {
                   </td>
                 </tr>
               ))}
+              {(!data.courses || data.courses.length === 0) && (
+                <tr>
+                  <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
+                    Không có môn học nào
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -323,31 +344,33 @@ function TuitionInfo({ data }) {
   return (
     <div className="space-y-6">
       {/* Current Term */}
-      <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
-          Học phí kỳ hiện tại
-        </h3>
-        <div className="space-y-2">
-          <p className="text-gray-700">{data.currentTerm.term}</p>
-          <div className="flex justify-between items-baseline">
-            <p className="text-2xl font-bold text-blue-600">
-              {data.currentTerm.amount.toLocaleString('vi-VN')} VNĐ
+      {data.currentTerm && (
+        <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            Học phí kỳ hiện tại
+          </h3>
+          <div className="space-y-2">
+            <p className="text-gray-700">{data.currentTerm.term}</p>
+            <div className="flex justify-between items-baseline">
+              <p className="text-2xl font-bold text-blue-600">
+                {data.currentTerm.amount.toLocaleString('vi-VN')} VNĐ
+              </p>
+              <span
+                className={`px-2 py-1 text-xs font-medium rounded-full ${
+                  data.currentTerm.status === 'paid'
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-red-100 text-red-800'
+                }`}
+              >
+                {data.currentTerm.status === 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán'}
+              </span>
+            </div>
+            <p className="text-sm text-gray-500">
+              Hạn nộp: {new Date(data.currentTerm.dueDate).toLocaleDateString('vi-VN')}
             </p>
-            <span
-              className={`px-2 py-1 text-xs font-medium rounded-full ${
-                data.currentTerm.status === 'paid'
-                  ? 'bg-green-100 text-green-800'
-                  : 'bg-red-100 text-red-800'
-              }`}
-            >
-              {data.currentTerm.status === 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán'}
-            </span>
           </div>
-          <p className="text-sm text-gray-500">
-            Hạn nộp: {new Date(data.currentTerm.dueDate).toLocaleDateString('vi-VN')}
-          </p>
         </div>
-      </div>
+      )}
 
       {/* Payment History */}
       <div>
@@ -355,7 +378,7 @@ function TuitionInfo({ data }) {
           Lịch sử đóng học phí
         </h3>
         <div className="space-y-4">
-          {data.history.map((term, index) => (
+          {(data.history || []).map((term, index) => (
             <div
               key={index}
               className="border rounded-lg p-4"
@@ -382,6 +405,11 @@ function TuitionInfo({ data }) {
               </p>
             </div>
           ))}
+          {(!data.history || data.history.length === 0) && (
+            <div className="text-center text-gray-500">
+              Không có lịch sử học phí
+            </div>
+          )}
         </div>
       </div>
     </div>
