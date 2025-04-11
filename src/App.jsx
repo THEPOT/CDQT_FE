@@ -5,19 +5,24 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import GuestRoute from './components/GuestRoute';
 import Login from './pages/Login';
 import Home from './pages/Home';
-import StudentInfo from './pages/StudentInfo';
-import CourseRegistration from './pages/CourseRegistration';
-import CourseInfo from './pages/CourseInfo';
-import Transcript from './pages/Transcript';
-import DegreeAudit from './pages/DegreeAudit';
+import StudentDashboard from './pages/student/StudentDashboard';
+import AdminDashboard from './pages/AdminDashboard';
+import TeacherDashboard from './pages/teacher/TeacherDashboard';
+import StaffDashboard from './pages/staff/StaffDashboard';
+import StudentInfo from './pages/student/StudentInfo';
+import CourseRegistration from "./pages/CourseRegistration";
+import CourseInfo from './pages/course/CourseInfo';
+import Transcript from './pages/student/Transcript';
+import DegreeAudit from './pages/student/DegreeAudit';
 import Services from './pages/Services';
-import CourseEvaluation from './pages/CourseEvaluation';
-import StudentInformationManagement from './pages/StudentInformationManagement';
-import TeacherDashboard from './pages/TeacherDashboard';
+import CourseEvaluation from './pages/course/CourseEvaluation.jsx'; 
+import StudentInformationManagement from './pages/admin/StudentInformationManagement';
+import CourseManagement from './pages/admin/CourseManagement';
+import Settings from './pages/Settings';
 import ClassManagement from './components/teacher/ClassManagement';
 import GradeManagement from './components/teacher/GradeManagement';
-import StaffDashboard from './pages/StaffDashboard';
 import RequestManagement from './components/staff/RequestManagement';
+import TermManagement from './pages/staff/TermManagement';
 
 function App() {
   return (
@@ -34,7 +39,11 @@ function App() {
           />
           
           <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-            <Route path="/" element={<Home />} />
+            {/* Admin Routes */}
+            <Route path="/admin-dashboard" element={<AdminDashboard />} />
+            <Route path="/student-management" element={<StudentInformationManagement />} />
+            <Route path="/course-management" element={<CourseManagement />} />
+            <Route path="/settings" element={<Settings />} />
             
             {/* Student Routes */}
             <Route path="/student-info" element={<StudentInfo />} />
@@ -53,9 +62,10 @@ function App() {
             {/* Staff Routes */}
             <Route path="/staff-dashboard" element={<StaffDashboard />} />
             <Route path="/request-management" element={<RequestManagement />} />
+            <Route path="/term-management" element={<TermManagement />} />
             
-            {/* Admin Routes */}
-            <Route path="/student-management" element={<StudentInformationManagement />} />
+            {/* Fallback route */}
+            <Route path="/" element={<Home />} />
           </Route>
         </Routes>
       </BrowserRouter>
@@ -64,3 +74,9 @@ function App() {
 }
 
 export default App;
+
+
+
+
+
+

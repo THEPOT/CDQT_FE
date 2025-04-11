@@ -21,21 +21,22 @@ function Sidebar() {
 
   const getMenuItems = () => {
     switch (user?.role) {
-      case 'teacher':
+      case 'Professor':
         return [
           { path: '/teacher-dashboard', icon: RiDashboardLine, label: 'Trang chủ' },
           { path: '/class-management', icon: RiGroupLine, label: 'Quản lý lớp học' },
           { path: '/grade-management', icon: RiFileList3Line, label: 'Quản lý điểm' },
           { path: '/course-info', icon: RiBookOpenLine, label: 'Thông tin môn học' }
         ];
-      case 'staff':
+      case 'Staff':
         return [
           { path: '/staff-dashboard', icon: RiDashboardLine, label: 'Trang chủ' },
+          { path: '/term-management', icon: RiCalendarCheckLine, label: 'Quản lý kỳ học' },
           { path: '/student-management', icon: RiUserLine, label: 'Quản lý sinh viên' },
           { path: '/request-management', icon: RiMailLine, label: 'Quản lý yêu cầu' },
           { path: '/course-management', icon: RiBookOpenLine, label: 'Quản lý môn học' }
         ];
-      case 'admin':
+      case 'Admin':
         return [
           { path: '/', icon: RiDashboardLine, label: 'Trang chủ' },
           { path: '/student-management', icon: RiUserLine, label: 'Quản lý sinh viên' },
