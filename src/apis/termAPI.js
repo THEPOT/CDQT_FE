@@ -12,19 +12,23 @@ export const getSemestersAPI = async () => {
 
 // B. Registration Period Management
 export const createRegistrationPeriodAPI = async (data) => {
-  return await authorizedAxiosInstance.post(`${BASE_URL}/registration-periods`, data);
+  return await authorizedAxiosInstance.post(`${BASE_URL}/RegistrationPeriods`, data);
+};
+
+export const getRegistrationPeriodsAPI = async () => {
+  return await authorizedAxiosInstance.get(`${BASE_URL}/RegistrationPeriods`);
 };
 
 export const updateRegistrationStatusAPI = async (periodId, status) => {
   return await authorizedAxiosInstance.put(
-    `${BASE_URL}/registration-periods/${periodId}/status`,
+    `${BASE_URL}/RegistrationPeriods/${periodId}/status`,
     { status }
   );
 };
 
 // C. Course & Schedule Management
 export const createCourseOfferingsAPI = async (data) => {
-  return await authorizedAxiosInstance.post(`${BASE_URL}/course-offerings`, data);
+  return await authorizedAxiosInstance.post(`${BASE_URL}/CourseOfferings`, data);
 };
 
 // D. Registration Statistics
@@ -52,3 +56,6 @@ export const getCourseStudentsAPI = async (courseOfferingId) => {
     `${BASE_URL}/courses/${courseOfferingId}/students`
   );
 };
+
+
+
