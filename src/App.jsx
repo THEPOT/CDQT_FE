@@ -10,7 +10,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import TeacherDashboard from './pages/teacher/TeacherDashboard';
 import StaffDashboard from './pages/staff/StaffDashboard';
 import StudentInfo from './pages/student/StudentInfo';
-import CourseRegistration from "./pages/CourseRegistration";
+import CourseRegistration from "./pages/course/CourseRegistration.jsx";
 import CourseInfo from './pages/course/CourseInfo';
 import Transcript from './pages/student/Transcript';
 import DegreeAudit from './pages/student/DegreeAudit';
@@ -22,7 +22,8 @@ import Settings from './pages/Settings';
 import ClassManagement from './components/teacher/ClassManagement';
 import GradeManagement from './components/teacher/GradeManagement';
 import RequestManagement from './components/staff/RequestManagement';
-import TermManagement from './pages/staff/TermManagement';
+import TermManagement from './pages/staff/TermManagement/TermManagement.jsx';
+
 
 function App() {
   return (
@@ -63,7 +64,6 @@ function App() {
             <Route path="/staff-dashboard" element={<StaffDashboard />} />
             <Route path="/request-management" element={<RequestManagement />} />
             <Route path="/term-management" element={<TermManagement />} />
-            
             {/* Fallback route */}
             <Route path="/" element={<Home />} />
           </Route>

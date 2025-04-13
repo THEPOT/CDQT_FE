@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { RiFilter2Line, RiSearchLine, RiCalendarLine, RiTimeLine, RiMapPin2Line, RiUser2Line } from 'react-icons/ri';
-import { getCourseAPI } from '../../apis/courseAPI';
+import { getCourseAPI, registerCourseAPI } from '../../apis/courseAPI';
 
 function CourseRegistration() {
   const [selectedCourses, setSelectedCourses] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [courses, setCourses] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [filters, setFilters] = useState({
     department: '',
     credits: '',
@@ -22,100 +23,144 @@ function CourseRegistration() {
       setCourses(response.data);
     } catch (error) {
       console.error('Error fetching course data:', error);
+      // Thêm thông báo lỗi ở đây
     }
   };
 
-  const handleRegisterCourse = (course) => {
-    setSelectedCourses([...selectedCourses, course]);
+  const handleSelectCourse = (course) => {
+    if (selectedCourses.some(c => c.id === course.id)) {
+      setSelectedCourses(selectedCourses.filter(c => c.id !== course.id));
+    } else {
+      setSelectedCourses([...selectedCourses, course]);
+    }
   };
 
-  const handleRemoveCourse = (courseId) => {
-    setSelectedCourses(selectedCourses.filter(c => c.courseCode !== courseId));
+  const handleRegisterCourses = async () => {
+    setIsLoading(true);
+    try {
+      // Đăng ký từng môn học
+      for (const course of selectedCourses) {
+        console.log('Registering course:', course.courseOfferingId);
+        
+        await registerCourseAPI({ CourseOfferingId: course.courseOfferingId });
+      }
+      // Thêm thông báo thành công
+      setSelectedCourses([]); // Clear selection after successful registration
+    } catch (error) {
+      console.error('Error registering courses:', error);
+      // Thêm thông báo lỗi
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="container mx-auto p-4">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          {/* Search and Filters */}
+        {/* Danh sách môn học có thể đăng ký */}
+        <div className="lg:col-span-2">
           <div className="bg-white rounded-xl shadow-sm p-6">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1 relative">
-                <RiSearchLine className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm môn học..."
-                  className="pl-10 w-full border border-gray-300 rounded-lg py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <button
-                className="flex items-center gap-2 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
-                onClick={() => {/* Toggle filters */}}
-              >
-                <RiFilter2Line />
-                Bộ lọc
-              </button>
+            <h2 className="text-xl font-semibold mb-4">Danh sách môn học</h2>
+            
+            {/* Search and Filters */}
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder="Tìm kiếm môn học..."
+                className="input input-bordered w-full"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
-          </div>
 
-          {/* Available Courses */}
-          <div className="bg-white rounded-xl shadow-sm divide-y">
-            {courses.map((course) => (
-              <div key={course.courseCode} className="p-6 hover:bg-gray-50">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="text-lg font-medium text-gray-900">
-                      {course.courseName}
-                    </h3>
-                    <p className="text-sm text-gray-500">
-                      Mã môn: {course.courseCode} • Lớp: {course.className}
-                    </p>
+            {/* Course List */}
+            <div className="divide-y">
+              {courses.map((course) => {
+                const isSelected = selectedCourses.some(c => c.id === course.id);
+                
+                return (
+                  <div key={course.id} className="py-4">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-4">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => handleSelectCourse(course)}
+                            className="checkbox checkbox-primary"
+                          />
+                          <div>
+                            <h3 className="text-lg font-medium text-gray-900">
+                              {course.courseName}
+                            </h3>
+                            <div className="mt-1 text-sm text-gray-500">
+                              <p>Mã môn: {course.courseCode}</p>
+                              <p>Lớp: {course.className} • Giảng viên: {course.instructor}</p>
+                              <p>Thời gian: {course.schedule} • Phòng: {course.room}</p>
+                              <p>Số tín chỉ: {course.credits} • Sĩ số: {course.capacity - course.availableSlots}/{course.capacity}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <button
-                    onClick={() => handleRegisterCourse(course)}
-                    disabled={selectedCourses.some(c => c.courseCode === course.courseCode)}
-                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                  >
-                    {selectedCourses.some(c => c.courseCode === course.courseCode)
-                      ? 'Đã đăng ký'
-                      : 'Đăng ký'}
-                  </button>
-                </div>
-              </div>
-            ))}
+                );
+              })}
+            </div>
           </div>
         </div>
 
-        {/* Selected Courses */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">
-            Môn học đã chọn
-          </h2>
-          <div className="space-y-4">
-            {selectedCourses.map((course) => (
-              <div
-                key={course.courseCode}
-                className="flex justify-between items-center p-4 border rounded-lg"
-              >
-                <div>
-                  <h3 className="font-medium text-gray-900">{course.courseName}</h3>
-                  <p className="text-sm text-gray-500">Mã môn: {course.courseCode}</p>
-                </div>
-                <button
-                  onClick={() => handleRemoveCourse(course.courseCode)}
-                  className="text-red-600 hover:text-red-700"
+        {/* Môn học đã chọn */}
+        <div>
+          <div className="bg-white rounded-xl shadow-sm p-6 sticky top-4">
+            <h2 className="text-lg font-medium text-gray-900 mb-4">
+              Môn học đã chọn ({selectedCourses.length})
+            </h2>
+            <div className="space-y-4">
+              {selectedCourses.map((course) => (
+                <div
+                  key={course.id}
+                  className="flex justify-between items-start p-4 border rounded-lg hover:bg-gray-50"
                 >
-                  Xóa
-                </button>
+                  <div>
+                    <h3 className="font-medium text-gray-900">{course.courseName}</h3>
+                    <p className="text-sm text-gray-500">Mã môn: {course.courseCode}</p>
+                    <p className="text-sm text-gray-500">{course.schedule}</p>
+                  </div>
+                  <button
+                    onClick={() => handleSelectCourse(course)}
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    Bỏ chọn
+                  </button>
+                </div>
+              ))}
+              {selectedCourses.length === 0 && (
+                <p className="text-center text-gray-500 py-4">
+                  Chưa có môn học nào được chọn
+                </p>
+              )}
+            </div>
+
+            {/* Tổng kết và nút đăng ký */}
+            <div className="mt-6 pt-6 border-t">
+              <div className="flex justify-between text-sm">
+                <span>Tổng số môn:</span>
+                <span>{selectedCourses.length}</span>
               </div>
-            ))}
-            {selectedCourses.length === 0 && (
-              <p className="text-center text-gray-500">
-                Chưa có môn học nào được chọn
-              </p>
-            )}
+              <div className="flex justify-between text-sm mt-2">
+                <span>Tổng số tín chỉ:</span>
+                <span>{selectedCourses.reduce((sum, course) => sum + course.credits, 0)}</span>
+              </div>
+              
+              <button
+                onClick={handleRegisterCourses}
+                disabled={isLoading || selectedCourses.length === 0}
+                className="btn btn-primary w-full mt-4"
+              >
+                {isLoading ? 'Đang xử lý...' : 'Xác nhận đăng ký'}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -124,3 +169,4 @@ function CourseRegistration() {
 }
 
 export default CourseRegistration;
+
