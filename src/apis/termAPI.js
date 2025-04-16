@@ -19,6 +19,11 @@ export const getRegistrationPeriodsAPI = async () => {
   return await authorizedAxiosInstance.get(`${BASE_URL}/RegistrationPeriods`);
 };
 
+export const getRegistrationPeriodByIdAPI = async (periodId) => {
+  return await authorizedAxiosInstance.get(`${BASE_URL}/RegistrationPeriods/${periodId}`);
+};
+
+
 export const updateRegistrationStatusAPI = async (periodId, status) => {
   return await authorizedAxiosInstance.put(
     `${BASE_URL}/RegistrationPeriods/${periodId}/status`,
@@ -51,11 +56,6 @@ export const getProgramStatisticsAPI = async (periodId) => {
   );
 };
 
-export const getCourseStudentsAPI = async (courseOfferingId) => {
-  return await authorizedAxiosInstance.get(
-    `${BASE_URL}/courses/${courseOfferingId}/students`
-  );
-};
 
 
 

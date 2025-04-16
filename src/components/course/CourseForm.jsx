@@ -33,52 +33,59 @@ function CourseForm({ course, departments, allCourses, onSubmit, onClose, mode }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">
-            {mode === 'add' ? 'Thêm môn học mới' : 'Chỉnh sửa môn học'}
-          </h2>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded">
-            <FiX />
+    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-2xl p-8 w-full max-w-2xl shadow-2xl border border-blue-100 max-h-[90vh] overflow-y-auto animate-fadeIn">
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-3">
+            <span className="bg-blue-100 text-blue-600 rounded-full p-3 text-2xl shadow"><FiPlus /></span>
+            <h2 className="text-2xl font-extrabold tracking-tight text-gray-800">
+              {mode === 'add' ? 'Thêm môn học mới' : 'Chỉnh sửa môn học'}
+            </h2>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-red-100 text-red-500 rounded-full transition-all duration-150" title="Đóng">
+            <FiX size={22} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
+
           {mode === 'add' && (
             <div>
-              <label className="block text-sm font-medium mb-1">Mã môn học</label>
+              <label className="block text-base font-semibold mb-2 text-gray-700">Mã môn học</label>
               <input
                 type="text"
-                className="input input-bordered w-full"
+                className="w-full rounded-xl border-2 border-gray-200 px-4 py-2 focus:border-blue-400 focus:outline-none shadow-sm text-base transition-all duration-150"
                 value={formData.courseCode}
                 onChange={(e) => setFormData({...formData, courseCode: e.target.value})}
                 required
+                placeholder="Nhập mã môn học"
               />
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium mb-1">Tên môn học</label>
+            <label className="block text-base font-semibold mb-2 text-gray-700">Tên môn học</label>
             <input
               type="text"
-              className="input input-bordered w-full"
+              className="w-full rounded-xl border-2 border-gray-200 px-4 py-2 focus:border-blue-400 focus:outline-none shadow-sm text-base transition-all duration-150"
               value={formData.courseName}
               onChange={(e) => setFormData({...formData, courseName: e.target.value})}
               required
+              placeholder="Nhập tên môn học"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium mb-1">Số tín chỉ</label>
+              <label className="block text-base font-semibold mb-2 text-gray-700">Số tín chỉ</label>
               <input
                 type="number"
-                className="input input-bordered w-full"
+                className="w-full rounded-xl border-2 border-gray-200 px-4 py-2 focus:border-blue-400 focus:outline-none shadow-sm text-base transition-all duration-150"
                 value={formData.credits}
                 onChange={(e) => setFormData({...formData, credits: parseInt(e.target.value)})}
                 required
                 min="0"
+                placeholder="Nhập số tín chỉ"
               />
             </div>
 
@@ -92,7 +99,7 @@ function CourseForm({ course, departments, allCourses, onSubmit, onClose, mode }
               >
                 <option value="">Chọn khoa</option>
                 {departments.map(dept => (
-                  <option key={dept.id} value={dept.id}>{dept.name}</option>
+                  <option key={dept.id} value={dept.id}>{dept.departmentName}</option>
                 ))}
               </select>
             </div>

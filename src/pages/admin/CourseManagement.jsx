@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FiPlus, FiEdit2, FiTrash2, FiSearch } from 'react-icons/fi';
 import CourseForm from '@/components/course/CourseForm';
-import { getCourseAPI, getDepartmentsAPI } from '../../apis/courseAPI';
+import { createCourseAPI, getCourseStaffAPI, getDepartmentsAPI, updateCourseAPI } from '../../apis/courseAPI';
 
 function CourseManagement() {
   const [courses, setCourses] = useState([]);
@@ -18,7 +18,7 @@ function CourseManagement() {
   const fetchData = async () => {
     try {
       const [coursesRes, departmentsRes] = await Promise.all([
-        getCourseAPI(),
+        getCourseStaffAPI(),
         getDepartmentsAPI()
       ]);
       setCourses(coursesRes.data);
@@ -71,32 +71,36 @@ function CourseManagement() {
   );
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Quản lý Môn học</h1>
-        <button className="btn btn-primary" onClick={handleAdd}>
-          <FiPlus className="mr-2" /> Thêm môn học
+    <div className="max-w-5xl mx-auto p-6 bg-white rounded-2xl shadow-xl mt-8">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+        <div className="flex items-center gap-3">
+          <span className="bg-blue-100 text-blue-600 rounded-full p-3 text-3xl shadow-sm"><FiPlus /></span>
+          <h1 className="text-3xl font-extrabold tracking-tight text-gray-800">Quản lý Môn học</h1>
+        </div>
+        <button
+          className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-indigo-500 hover:to-blue-500 text-white px-6 py-2 rounded-full shadow-lg font-semibold flex items-center gap-2 transition-all duration-200"
+          onClick={handleAdd}
+        >
+          <FiPlus className="text-lg" /> Thêm môn học
         </button>
       </div>
 
-      <div className="mb-4">
-        <div className="input-group">
+      <div className="mb-6 flex justify-end">
+        <div className="relative w-full sm:w-96">
           <input
             type="text"
             placeholder="Tìm kiếm môn học..."
-            className="input input-bordered w-full"
+            className="pl-12 pr-4 py-2 w-full border-2 border-gray-200 rounded-full focus:border-blue-400 focus:outline-none shadow-sm transition-all duration-200"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <button className="btn btn-square">
-            <FiSearch />
-          </button>
+          <span className="absolute left-4 top-2.5 text-gray-400 text-xl"><FiSearch /></span>
         </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="table w-full">
-          <thead>
+      <div className="overflow-x-auto rounded-2xl shadow-lg">
+        <table className="min-w-full bg-white rounded-2xl">
+          <thead className="bg-gradient-to-r from-blue-50 to-indigo-100">
             <tr>
               <th>Mã môn</th>
               <th>Tên môn học</th>
@@ -108,24 +112,29 @@ function CourseManagement() {
           </thead>
           <tbody>
             {filteredCourses.map(course => (
-              <tr key={course.id}>
-                <td>{course.courseCode}</td>
-                <td>{course.courseName}</td>
-                <td>{course.credits}</td>
-                <td>{course.departmentName}</td>
-                <td>
+              <tr
+                key={course.id}
+                className="border-b last:border-none hover:bg-blue-50 transition-colors group"
+              >
+                <td className="py-2 px-4 font-mono text-blue-700">{course.courseCode}</td>
+                <td className="py-2 px-4">{course.courseName}</td>
+                <td className="py-2 px-4 text-center">{course.credits}</td>
+                <td className="py-2 px-4">{course.departmentName}</td>
+                <td className="py-2 px-4 text-gray-500">
                   {course.prerequisites?.map(p => p.courseCode).join(', ')}
                 </td>
-                <td>
-                  <div className="flex gap-2">
+                <td className="py-2 px-4 text-center">
+                  <div className="flex justify-center gap-2">
                     <button
-                      className="btn btn-sm btn-ghost"
+                      className="rounded-full p-2 bg-blue-100 text-blue-600 hover:bg-blue-500 hover:text-white transition-all duration-150 shadow-sm"
+                      title="Sửa"
                       onClick={() => handleEdit(course)}
                     >
                       <FiEdit2 />
                     </button>
                     <button
-                      className="btn btn-sm btn-ghost text-error"
+                      className="rounded-full p-2 bg-red-100 text-red-600 hover:bg-red-500 hover:text-white transition-all duration-150 shadow-sm"
+                      title="Xóa"
                       onClick={() => handleDelete(course.id)}
                     >
                       <FiTrash2 />
