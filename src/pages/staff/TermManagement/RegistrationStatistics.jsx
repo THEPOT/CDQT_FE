@@ -16,7 +16,7 @@ function RegistrationStatistics() {
     const fetchSemesters = async () => {
       try {
         const response = await getSemestersAPI();
-        setSemesters(response.data);
+        setSemesters(response.data.items);
       } catch (error) {
         console.error('Error fetching semesters:', error);
       }

@@ -23,9 +23,9 @@ function CourseScheduleManagement() {
         getCourseStaffAPI(),
         getProfesserAPI(),
       ]);
-      setSemesters(semestersRes.data);
-      setCourses(coursesRes.data);
-      setInstructors(instructorsRes.data);
+      setSemesters(semestersRes.data.items);
+      setCourses(coursesRes.data.items);
+      setInstructors(instructorsRes.data.items);
     } catch (error) {
       console.error('Error fetching initial data:', error);
     }

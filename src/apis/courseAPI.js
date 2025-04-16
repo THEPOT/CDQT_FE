@@ -9,8 +9,8 @@ export const registerCourseAPI = async (data) => {
   return await authorizedAxiosInstance.post(`${BASE_URL}/CourseRegistrations/register`, data);
 };
 
-export const getCourseStaffAPI = async () => {
-  return await authorizedAxiosInstance.get(`${BASE_URL}/Course`);
+export const getCourseStaffAPI = async (size, page) => {
+  return await authorizedAxiosInstance.get(`${BASE_URL}/Course?page=${page || 1}&size=${size || 10}`);
 };
 
 export const getDepartmentsAPI = async () => {

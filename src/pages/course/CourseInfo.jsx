@@ -19,7 +19,7 @@ function CourseInfo() {
   const fetchCourses = async () => {
     try {
       const response = await getCourseStaffAPI();
-      setCourses(response.data);
+      setCourses(response.data.items);
     } catch (error) {
       console.error('Error fetching courses:', error);
     }

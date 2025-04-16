@@ -21,7 +21,7 @@ function CourseManagement() {
         getCourseStaffAPI(),
         getDepartmentsAPI()
       ]);
-      setCourses(coursesRes.data);
+      setCourses(coursesRes.data.items);
       setDepartments(departmentsRes.data);
     } catch (error) {
       console.error('Error fetching data:', error);

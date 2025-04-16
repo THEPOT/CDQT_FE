@@ -1,42 +1,30 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { RiDownloadLine, RiPrinterLine } from 'react-icons/ri';
+import { getTranscriptAPI } from '../../apis/transcriptAPI';
 
 function Transcript() {
   const [selectedSemester, setSelectedSemester] = useState('all');
+  const [transcriptData, setTranscriptData] = useState({
+    mssv: '',
+    studentName: '',
+    majorName: '',
+    cumulativeGPA: 0,
+    totalCredits: 0,
+    totalCreditsPassed: 0,
+    semesters: []
+  });
 
-  const transcriptData = {
-    student: {
-      name: 'Nguyễn Văn A',
-      id: '2023001',
-      program: 'Khoa học máy tính',
-      gpa: 3.65
-    },
-    semesters: [
-      {
-        id: '20231',
-        name: 'Học kỳ 1 - 2023-2024',
-        courses: [
-          {
-            code: 'CS101',
-            name: 'Nhập môn lập trình',
-            credits: 3,
-            midterm: 8.5,
-            final: 9.0,
-            grade: 'A',
-            status: 'passed'
-          },
-          {
-            code: 'CS102',
-            name: 'Cấu trúc dữ liệu',
-            credits: 4,
-            midterm: 7.5,
-            final: 8.0,
-            grade: 'B+',
-            status: 'passed'
-          }
-        ]
-      }
-    ]
+  useEffect(() => {
+    fetchTranscript();
+  }, []);
+
+  const fetchTranscript = async () => {
+    try {
+      const response = await getTranscriptAPI();
+      setTranscriptData(response.data);
+    } catch (error) {
+      console.error('Error fetching transcript data:', error);
+    }
   };
 
   return (
@@ -45,7 +33,7 @@ function Transcript() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Bảng điểm</h1>
           <p className="text-gray-600">
-            {transcriptData.student.name} - MSSV: {transcriptData.student.id}
+            {transcriptData.studentName} - MSSV: {transcriptData.mssv}
           </p>
         </div>
         <div className="flex gap-2">
@@ -68,13 +56,16 @@ function Transcript() {
             onChange={(e) => setSelectedSemester(e.target.value)}
           >
             <option value="all">Tất cả học kỳ</option>
-            <option value="20231">Học kỳ 1 - 2023-2024</option>
-            <option value="20232">Học kỳ 2 - 2023-2024</option>
+            {transcriptData.semesters.map((semester, index) => (
+              <option key={index} value={semester.semesterName}>
+                {semester.semesterName}
+              </option>
+            ))}
           </select>
 
           <div className="bg-blue-50 p-4 rounded-lg">
             <div className="text-sm text-gray-600">GPA Tích lũy</div>
-            <div className="text-2xl font-bold text-blue-600">{transcriptData.student.gpa}</div>
+            <div className="text-2xl font-bold text-blue-600">{transcriptData.cumulativeGPA.toFixed(2)}</div>
           </div>
         </div>
 
@@ -91,25 +82,27 @@ function Transcript() {
             </tr>
           </thead>
           <tbody>
-            {transcriptData.semesters[0].courses.map((course) => (
-              <tr key={course.code} className="border-b">
-                <td className="py-3">{course.code}</td>
-                <td className="py-3">{course.name}</td>
-                <td className="text-center py-3">{course.credits}</td>
-                <td className="text-center py-3">{course.midterm}</td>
-                <td className="text-center py-3">{course.final}</td>
-                <td className="text-center py-3">{course.grade}</td>
-                <td className="text-center py-3">
-                  <span className={`px-2 py-1 rounded text-sm ${
-                    course.status === 'passed' 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {course.status === 'passed' ? 'Đạt' : 'Không đạt'}
-                  </span>
-                </td>
-              </tr>
-            ))}
+            {transcriptData.semesters.map((semester) => 
+              semester.courses.map((course) => (
+                <tr key={course.courseCode} className="border-b">
+                  <td className="py-3">{course.courseCode}</td>
+                  <td className="py-3">{course.courseName}</td>
+                  <td className="text-center py-3">{course.credits}</td>
+                  <td className="text-center py-3">{course.midtermScore}</td>
+                  <td className="text-center py-3">{course.finalScore}</td>
+                  <td className="text-center py-3">{course.letterGrade}</td>
+                  <td className="text-center py-3">
+                    <span className={`px-2 py-1 rounded text-sm ${
+                      course.result === 'Đạt' 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {course.result}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
@@ -118,3 +111,4 @@ function Transcript() {
 }
 
 export default Transcript;
+
