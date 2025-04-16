@@ -59,10 +59,8 @@ function CourseScheduleManagement() {
 
       // Bọc dữ liệu trong trường 'request' như API yêu cầu
       const requestData = {
-        request: {
           semesterId: formData.semesterId,
           offerings: formattedOfferings
-        }
       };
 
       // Gửi dữ liệu đến API

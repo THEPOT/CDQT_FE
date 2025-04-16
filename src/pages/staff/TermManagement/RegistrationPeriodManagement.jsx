@@ -16,7 +16,7 @@ import ReactPaginate from "react-paginate";
 
 function RegistrationPeriodManagement() {
   const [semesters, setSemesters] = useState([]);
-  const [selectedPeriod, setSelectedPeriod] = useState(null);
+  const [selectedPeriod, setSelectedPeriod] = useState('');
   const [registrationPeriods, setRegistrationPeriods] = useState([]);
   const [formData, setFormData] = useState({
     semesterId: "",
@@ -160,6 +160,16 @@ function RegistrationPeriodManagement() {
         return "bg-yellow-100 text-yellow-800";
       default:
         return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'OPEN': return 'text-success';
+      case 'CLOSED': return 'text-error';
+      case 'UPCOMING': return 'text-warning';
+      case 'MAINTENANCE': return 'text-info';
+      default: return '';
     }
   };
 
