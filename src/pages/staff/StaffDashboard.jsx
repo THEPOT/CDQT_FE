@@ -1,4 +1,3 @@
-import React from 'react';
 import { RiFileList3Line, RiUserLine, RiTimeLine } from 'react-icons/ri';
 
 function StaffDashboard() {
@@ -34,7 +33,7 @@ function StaffDashboard() {
         </div>
         <div className="bg-blue-50 p-4 rounded-lg">
           <RiTimeLine className="text-blue-500 text-2xl mb-2" />
-          <h3 className="font-semibold">Today's Appointments</h3>
+          <h3 className="font-semibold">Today&apos;s Appointments</h3>
           <p className="text-2xl">{staffData.todayAppointments}</p>
         </div>
       </div>

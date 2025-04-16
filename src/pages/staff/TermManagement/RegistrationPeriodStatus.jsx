@@ -1,249 +1,190 @@
-import React, { useState, useEffect } from 'react';
-import { updateRegistrationStatusAPI, getRegistrationPeriodByIdAPI } from '../../../apis/termAPI';
+/* eslint-disable react/prop-types */
+import { useEffect, useState } from "react";
+import { updateRegistrationStatusAPI } from "../../../apis/termAPI";
+import {
+  RiCloseLine,
+  RiLockLine,
+  RiLockUnlockLine,
+  RiSettings4Line,
+} from "react-icons/ri";
+import { ImSpinner8 } from 'react-icons/im';
+import { IoIosCheckmarkCircle } from 'react-icons/io';
+import { HiOutlineCheckCircle } from 'react-icons/hi';
 
 function RegistrationPeriodStatus({ periodId }) {
-  const [status, setStatus] = useState('');
-  const [periodInfo, setPeriodInfo] = useState(null);
+  const [status, setStatus] = useState("CLOSED");
+  const [fadeIn, setFadeIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [error, setError] = useState(null);
-
-  const statusOptions = [
-    { value: 'CLOSED', label: 'Đóng cổng đăng ký', color: 'bg-error/10 text-error border-error/20', icon: 'lock' },
-    { value: 'OPEN', label: 'Mở cổng đăng ký', color: 'bg-success/10 text-success border-success/20', icon: 'unlock' },
-    { value: 'MAINTENANCE', label: 'Bảo trì hệ thống', color: 'bg-warning/10 text-warning border-warning/20', icon: 'wrench' }
-  ];
+  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
-    if (periodId) {
-      fetchPeriodStatus();
-    }
-  }, [periodId]);
+    // Hiệu ứng fade in khi component mount
+    setFadeIn(true);
+  }, []);
+  
+  const statusOptions = [
+    {
+      value: "CLOSED",
+      label: "Đóng cổng đăng ký",
+      color: "bg-red-100 text-red-800 border-red-200",
+      hoverColor: "hover:bg-red-50",
+      activeColor: "bg-red-100",
+      icon: <RiLockLine className="w-5 h-5" />,
+      description: "Sinh viên không thể đăng ký hoặc hủy đăng ký các khóa học",
+    },
+    {
+      value: "OPEN",
+      label: "Mở cổng đăng ký",
+      color: "bg-green-100 text-green-800 border-green-200",
+      hoverColor: "hover:bg-green-50",
+      activeColor: "bg-green-100",
+      icon: <RiLockUnlockLine className="w-5 h-5" />,
+      description: "Sinh viên có thể đăng ký và hủy đăng ký các khóa học",
+    },
+    {
+      value: "MAINTENANCE",
+      label: "Bảo trì hệ thống",
+      color: "bg-yellow-100 text-yellow-800 border-yellow-200",
+      hoverColor: "hover:bg-yellow-50",
+      activeColor: "bg-yellow-100",
+      icon: <RiSettings4Line className="w-5 h-5" />,
+      description: "Cổng đăng ký tạm thời đóng để bảo trì",
+    },
+  ];
 
-  const fetchPeriodStatus = async () => {
-    if (!periodId) return;
-    
-    setIsLoading(true);
-    setError(null);
-    
+  const handleStatusChange = async (newStatus) => {
+    if (status === newStatus) return;
     try {
-      const response = await getRegistrationPeriodByIdAPI(periodId);
-      setPeriodInfo(response.data);
-      setStatus(response.data.status);
+      setIsLoading(true);
+      await updateRegistrationStatusAPI(periodId, newStatus);
+      setStatus(newStatus);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
+      // You can add a toast notification here
     } catch (error) {
-      console.error('Error fetching registration period details:', error);
-      setError('Không thể tải thông tin đợt đăng ký. Vui lòng thử lại sau.');
+      console.error("Error updating registration status:", error);
+      // You can add an error toast notification here
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleStatusChange = async (newStatus) => {
-    if (status === newStatus) return;
-    
-    setIsUpdating(true);
-    setError(null);
-    
-    const toastId = `status-toast-${Date.now()}`;
-    
-    try {
-      await updateRegistrationStatusAPI(periodId, newStatus);
-      setStatus(newStatus);
-      
-      // Show success toast
-      showToast(toastId, 'success', `Đã chuyển trạng thái thành ${getStatusLabel(newStatus)}`);
-    } catch (error) {
-      console.error('Error updating registration status:', error);
-      setError('Không thể cập nhật trạng thái. Vui lòng thử lại sau.');
-      
-      // Show error toast
-      showToast(toastId, 'error', 'Cập nhật trạng thái thất bại');
-    } finally {
-      setIsUpdating(false);
-    }
+  const getStatusText = () => {
+    const option = statusOptions.find((opt) => opt.value === status);
+    return option ? option.label : "";
   };
-
-  const showToast = (id, type, message) => {
-    // Create toast container if it doesn't exist
-    let toastContainer = document.getElementById('toast-container');
-    if (!toastContainer) {
-      toastContainer = document.createElement('div');
-      toastContainer.id = 'toast-container';
-      toastContainer.className = 'toast toast-top toast-end';
-      document.body.appendChild(toastContainer);
-    }
-    
-    // Create toast
-    const toast = document.createElement('div');
-    toast.id = id;
-    toast.className = `alert alert-${type} fade-in`;
-    toast.innerHTML = `<div><span>${message}</span></div>`;
-    
-    // Add to container
-    toastContainer.appendChild(toast);
-    
-    // Remove after 3 seconds
-    setTimeout(() => {
-      toast.classList.add('fade-out');
-      setTimeout(() => {
-        if (document.getElementById(id)) {
-          toastContainer.removeChild(toast);
-        }
-      }, 300);
-    }, 3000);
-  };
-
-  const getStatusLabel = (statusValue) => {
-    const option = statusOptions.find(opt => opt.value === statusValue);
-    return option ? option.label : statusValue;
-  };
-
-  const renderStatusIcon = (iconName) => {
-    switch(iconName) {
-      case 'lock':
-        return (
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-          </svg>
-        );
-      case 'unlock':
-        return (
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
-          </svg>
-        );
-      case 'wrench':
-        return (
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-        );
-      default:
-        return null;
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center p-8">
-        <span className="loading loading-spinner loading-lg text-primary"></span>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="alert alert-error">
-        <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <span>{error}</span>
-      </div>
-    );
-  }
-
-  if (!periodInfo) {
-    return (
-      <div className="text-center p-4">
-        <p>Vui lòng chọn đợt đăng ký để xem chi tiết.</p>
-      </div>
-    );
-  }
 
   return (
-    <div className="space-y-6">
-      {/* Period Info */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="stat bg-base-100 shadow rounded-lg">
-          <div className="stat-title">Kỳ học</div>
-          <div className="stat-value text-lg">{periodInfo.semesterName}</div>
-        </div>
-        <div className="stat bg-base-100 shadow rounded-lg">
-          <div className="stat-title">Tín chỉ tối đa</div>
-          <div className="stat-value text-lg">{periodInfo.maxCredits} TC</div>
-        </div>
-        <div className="stat bg-base-100 shadow rounded-lg">
-          <div className="stat-title">Thời gian bắt đầu</div>
-          <div className="stat-value text-lg">{new Date(periodInfo.startDate).toLocaleString('vi-VN')}</div>
-        </div>
-        <div className="stat bg-base-100 shadow rounded-lg">
-          <div className="stat-title">Thời gian kết thúc</div>
-          <div className="stat-value text-lg">{new Date(periodInfo.endDate).toLocaleString('vi-VN')}</div>
+    <div
+      className={`bg-white rounded-lg shadow-lg overflow-hidden transition-opacity duration-500 ${
+        fadeIn ? "opacity-100" : "opacity-0"
+      }`}
+    >
+      {/* Header */}
+      <div className="bg-blue-600 text-white px-6 py-4 flex justify-between items-center">
+        <h3 className="text-lg font-medium flex items-center">
+          <span className="mr-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </span>
+          Trạng thái cổng đăng ký
+        </h3>
+        <div
+          className={`px-3 py-1 rounded-full text-sm font-medium ${
+            statusOptions.find((opt) => opt.value === status)?.color
+          }`}
+        >
+          {getStatusText()}
         </div>
       </div>
 
-      {/* Status Controls */}
-      <div className="card bg-base-100 shadow">
-        <div className="card-body">
-          <h3 className="card-title text-lg font-medium mb-2">Thay đổi trạng thái cổng đăng ký</h3>
-          <p className="text-sm text-base-content/70 mb-4">
-            Chọn một trong các trạng thái dưới đây để điều chỉnh đợt đăng ký
-          </p>
-          
-          <div className="flex flex-col gap-3">
-            {statusOptions.map((option) => (
-              <button
-                key={option.value}
-                onClick={() => handleStatusChange(option.value)}
-                disabled={isUpdating || status === option.value}
-                className={`
-                  flex items-center justify-between p-4 rounded-lg border transition-all
-                  ${status === option.value 
-                    ? option.color + ' border-2' 
-                    : 'bg-base-100 border-base-300 hover:bg-base-200'}
-                  ${isUpdating ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-                `}
-              >
-                <span className="flex items-center gap-3">
-                  <span className={`w-10 h-10 rounded-full flex items-center justify-center 
-                    ${status === option.value 
-                      ? option.color.replace('bg-', 'bg-').replace('/10', '/20') 
-                      : 'bg-base-200'}`}>
-                    {renderStatusIcon(option.icon)}
-                  </span>
-                  <span className="font-medium">{option.label}</span>
-                </span>
-                
-                {status === option.value ? (
-                  <div className="badge badge-primary">Trạng thái hiện tại</div>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                  </svg>
-                )}
-              </button>
-            ))}
+      {/* Success notification */}
+      {showSuccess && (
+        <div className="mx-6 mt-4 flex items-center p-4 mb-4 text-sm text-green-800 border border-green-300 rounded-lg bg-green-50">
+          <IoIosCheckmarkCircle className="w-5 h-5 mr-2" />
+          <span>Cập nhật trạng thái thành công!</span>
+          <button onClick={() => setShowSuccess(false)} className="ml-auto">
+            <RiCloseLine className="w-5 h-5" />
+          </button>
+        </div>
+      )}
+
+      {/* Main content */}
+      <div className="p-6">
+        <p className="text-gray-600 mb-4">
+          Chọn trạng thái phù hợp để quản lý việc đăng ký học của sinh viên.
+        </p>
+
+        <div className="space-y-3">
+          {statusOptions.map((option) => (
+            <button
+              key={option.value}
+              onClick={() => handleStatusChange(option.value)}
+              disabled={isLoading || status === option.value}
+              className={`
+                w-full flex items-center justify-between p-4 rounded-lg border transition-all duration-200
+                ${
+                  status === option.value
+                    ? option.color
+                    : `border-gray-200 ${option.hoverColor}`
+                }
+                ${
+                  isLoading ? "opacity-60 cursor-not-allowed" : "cursor-pointer"
+                }
+                ${status === option.value ? "shadow-sm" : ""}
+              `}
+            >
+              <div className="flex items-center">
+                <div
+                  className={`p-2 rounded-full mr-3 ${
+                    status === option.value ? option.activeColor : "bg-gray-100"
+                  }`}
+                >
+                  {option.icon}
+                </div>
+                <div className="text-left">
+                  <p className="font-medium">{option.label}</p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {option.description}
+                  </p>
+                </div>
+              </div>
+
+              {status === option.value && (
+                <div className="flex items-center text-sm font-medium">
+                  <HiOutlineCheckCircle className="w-5 h-5 mr-1" />
+                  Đang áp dụng
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {isLoading && (
+          <div className="mt-4 text-center text-gray-600 flex items-center justify-center">
+            <ImSpinner8 className="w-5 h-5 mr-2 animate-spin" />
+            Đang cập nhật trạng thái...
           </div>
-  
-          {isUpdating && (
-            <div className="mt-4 flex justify-center text-base-content/60">
-              <span className="loading loading-spinner loading-sm mr-2"></span>
-              Đang cập nhật trạng thái...
-            </div>
-          )}
-        </div>
+        )}
       </div>
 
-      <style jsx>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(-10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes fadeOut {
-          from { opacity: 1; transform: translateY(0); }
-          to { opacity: 0; transform: translateY(-10px); }
-        }
-        
-        .fade-in {
-          animation: fadeIn 0.3s ease-in-out forwards;
-        }
-        
-        .fade-out {
-          animation: fadeOut 0.3s ease-in-out forwards;
-        }
-      `}</style>
+      {/* Footer */}
+      <div className="bg-gray-50 px-6 py-3 border-t border-gray-200">
+        <p className="text-xs text-gray-500">
+          Thay đổi trạng thái sẽ được áp dụng ngay lập tức và ảnh hưởng đến tất
+          cả sinh viên.
+        </p>
+      </div>
     </div>
   );
 }

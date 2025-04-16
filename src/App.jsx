@@ -5,7 +5,6 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import GuestRoute from './components/GuestRoute';
 import Login from './pages/Login';
 import Home from './pages/Home';
-import StudentDashboard from './pages/student/StudentDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import TeacherDashboard from './pages/teacher/TeacherDashboard';
 import StaffDashboard from './pages/staff/StaffDashboard';

@@ -6,8 +6,8 @@ export const createSemesterAPI = async (data) => {
   return await authorizedAxiosInstance.post(`${BASE_URL}/Semesters`, data);
 };
 
-export const getSemestersAPI = async () => {
-  return await authorizedAxiosInstance.get(`${BASE_URL}/Semesters`);
+export const getSemestersAPI = async (page, size) => {
+  return await authorizedAxiosInstance.get(`${BASE_URL}/Semesters?page=${page}&size=${size}`);
 };
 
 // B. Registration Period Management
