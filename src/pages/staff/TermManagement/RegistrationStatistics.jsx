@@ -1,5 +1,5 @@
 // src/components/TermManagement/RegistrationStatistics.jsx
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { getSemestersAPI } from '../../../apis/termAPI';
 import { getTermAnalyticsSummaryAPI, getTermSummariesAPI, getCourseRegistrationStatsAPI, getProgramRegistrationStatsAPI } from '../../../apis/analyticsAPI';
 import OverviewCards from './RegistrationStatistics/OverviewCards';

@@ -1,5 +1,5 @@
 // src/components/TermManagement/TermManagement.jsx
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Tab } from '@headlessui/react';
 import { FiCalendar, FiClock, FiUsers, FiBarChart2 } from 'react-icons/fi';
 import SemesterManagement from './SemesterManagement';

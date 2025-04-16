@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getSemestersAPI, createCourseOfferingsAPI } from '../../../apis/termAPI';
 import { getCourseStaffAPI } from '../../../apis/courseAPI';
 import { getProfesserAPI } from '../../../apis/professerAPI';

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import { useAuth } from "../contexts/AuthContext";
 
+// eslint-disable-next-line react/prop-types
 export const ProtectedRoute = ({ children }) => {
   const [isValidToken, setIsValidToken] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
@@ -56,7 +57,7 @@ export const ProtectedRoute = ({ children }) => {
       admin: ['/admin-dashboard', '/student-management', '/course-management', '/settings'],
       student: ['/', '/student-info', '/course-registration', '/course-info', '/transcript', '/degree-audit', '/services', '/course-evaluation'],
       professor: ['/teacher-dashboard', '/class-management', '/grade-management'],
-      staff: ['/staff-dashboard', '/request-management']
+      staff: ['/staff-dashboard', '/request-management', '/term-management']
     };
 
     // Allow access to home page for all authenticated users
