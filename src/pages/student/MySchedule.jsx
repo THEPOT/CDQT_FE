@@ -7,15 +7,67 @@ function MySchedule() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedWeek, setSelectedWeek] = useState(1);
+  const [weekRanges, setWeekRanges] = useState([]);
 
-  const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   const periods = ['Tiết 1-2', 'Tiết 3-4', 'Tiết 5-6', 'Tiết 7-8', 'Tiết 9-10', 'Tiết 11-12', 'Khác'];
 
   // Generate years array (current year and 2 years before/after)
   const years = Array.from({ length: 5 }, (_, i) => selectedYear - 2 + i);
-  
-  // Generate weeks array (1-52)
-  const weeks = Array.from({ length: 52 }, (_, i) => i + 1);
+
+  // Function to get date range for a week
+  const getWeekDateRange = (year, weekNumber) => {
+    const firstDayOfYear = new Date(year, 0, 1);
+    const firstMonday = new Date(firstDayOfYear);
+    while (firstMonday.getDay() !== 1) { // 1 is Monday
+      firstMonday.setDate(firstMonday.getDate() + 1);
+    }
+    
+    const startDate = new Date(firstMonday);
+    startDate.setDate(startDate.getDate() + (weekNumber - 1) * 7);
+    
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + 6);
+
+    return {
+      start: startDate,
+      end: endDate
+    };
+  };
+
+  // Function to get current week number
+  const getCurrentWeekNumber = (year) => {
+    const now = new Date();
+    const firstDayOfYear = new Date(year, 0, 1);
+    const firstMonday = new Date(firstDayOfYear);
+    while (firstMonday.getDay() !== 1) {
+      firstMonday.setDate(firstMonday.getDate() + 1);
+    }
+    
+    const diffTime = Math.abs(now - firstMonday);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return Math.ceil(diffDays / 7);
+  };
+
+  // Generate weeks array with date ranges and set current week
+  useEffect(() => {
+    const ranges = Array.from({ length: 52 }, (_, i) => {
+      const weekNumber = i + 1;
+      const range = getWeekDateRange(selectedYear, weekNumber);
+      return {
+        weekNumber,
+        startDate: range.start,
+        endDate: range.end
+      };
+    });
+    setWeekRanges(ranges);
+
+    // Set current week if selected year is current year
+    if (selectedYear === new Date().getFullYear()) {
+      const currentWeek = getCurrentWeekNumber(selectedYear);
+      setSelectedWeek(currentWeek);
+    }
+  }, [selectedYear]);
 
   useEffect(() => {
     fetchSchedule();
@@ -25,7 +77,7 @@ function MySchedule() {
     setIsLoading(true);
     try {
       const response = await getStudentScheduleAPI(selectedYear, selectedWeek);
-      setSchedule(response.data.items || []);
+      setSchedule(response.data || []);
     } catch (error) {
       console.error('Error fetching schedule:', error);
       toast.error('Không thể tải lịch học. Vui lòng thử lại sau!');
@@ -114,6 +166,13 @@ function MySchedule() {
     }
   }
 
+  const formatDate = (date) => {
+    return date.toLocaleDateString('vi-VN', {
+      day: '2-digit',
+      month: '2-digit'
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -152,8 +211,15 @@ function MySchedule() {
               value={selectedWeek}
               onChange={(e) => setSelectedWeek(Number(e.target.value))}
             >
-              {weeks.map(week => (
-                <option key={week} value={week}>Tuần {week}</option>
+              {weekRanges.map(({ weekNumber, startDate, endDate }) => (
+                <option 
+                  key={weekNumber} 
+                  value={weekNumber}
+                  className={selectedYear === new Date().getFullYear() && weekNumber === getCurrentWeekNumber(selectedYear) ? 'bg-blue-100' : ''}
+                >
+                  Tuần {weekNumber} ({formatDate(startDate)} - {formatDate(endDate)})
+                  {selectedYear === new Date().getFullYear() && weekNumber === getCurrentWeekNumber(selectedYear) ? ' (Tuần hiện tại)' : ''}
+                </option>
               ))}
             </select>
           </div>
