@@ -5,6 +5,10 @@ export const getCourseAPI = async () => {
   return await authorizedAxiosInstance.get(`${BASE_URL}/CourseRegistrations/available-courses`);
 };
 
+export const getCourseProfessorAPI = async (size, page) => {
+  return await authorizedAxiosInstance.get(`${BASE_URL}/Course?page=${page || 1}&size=${size || 10}`);
+};
+
 export const registerCourseAPI = async (data) => {
   return await authorizedAxiosInstance.post(`${BASE_URL}/CourseRegistrations/register`, data);
 };
