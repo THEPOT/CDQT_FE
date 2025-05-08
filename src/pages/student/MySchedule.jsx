@@ -9,7 +9,7 @@ function MySchedule() {
   const [selectedWeek, setSelectedWeek] = useState(1);
 
   const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  const periods = ['Tiết 1-2', 'Tiết 3-4', 'Tiết 5-6', 'Tiết 7-8', 'Tiết 9-10', 'Tiết 11-12'];
+  const periods = ['Tiết 1-2', 'Tiết 3-4', 'Tiết 5-6', 'Tiết 7-8', 'Tiết 9-10', 'Tiết 11-12', 'Khác'];
 
   // Generate years array (current year and 2 years before/after)
   const years = Array.from({ length: 5 }, (_, i) => selectedYear - 2 + i);
@@ -34,51 +34,85 @@ function MySchedule() {
     }
   };
 
-  const getTimeSlot = (startTime, endTime) => {
-    // Convert time to period index (0-5)
-    const startHour = parseInt(startTime.split(':')[0]);
-    const endHour = parseInt(endTime.split(':')[0]);
-    
-    // Map hours to periods
-    const periodMap = {
-      7: 0,  // 7:00-8:30 -> Period 1-2
-      8: 0,  // 8:30-10:00 -> Period 1-2
-      10: 1, // 10:00-11:30 -> Period 3-4
-      11: 1, // 11:30-13:00 -> Period 3-4
-      13: 2, // 13:00-14:30 -> Period 5-6
-      14: 2, // 14:30-16:00 -> Period 5-6
-      16: 3, // 16:00-17:30 -> Period 7-8
-      17: 3, // 17:30-19:00 -> Period 7-8
-      19: 4, // 19:00-20:30 -> Period 9-10
-      20: 4, // 20:30-22:00 -> Period 9-10
-    };
+  // Helper: Convert time string "HH:mm" to minutes since 00:00
+  function timeToMinutes(time) {
+    const [h, m] = time.split(':').map(Number);
+    return h * 60 + m;
+  }
 
-    return periodMap[startHour] || 0;
-  };
+  // Helper: Get period index (0-5) for a given startTime
+  function getTimeSlot(startTime) {
+    // Periods: 7:00, 10:00, 13:00, 16:00, 19:00, 21:00
+    const periodStartMinutes = [420, 600, 780, 960, 1140, 1260]; // 7:00, 10:00, ...
+    const start = timeToMinutes(startTime);
+    for (let i = 0; i < periodStartMinutes.length; i++) {
+      // Each period is 90 minutes
+      if (start >= periodStartMinutes[i] && start < periodStartMinutes[i] + 90) return i;
+    }
+    return null; // Not in any period
+  }
 
-  const getScheduleCell = (weekday, period) => {
-    const course = schedule.find(course => 
-      course.schedule.some(schedule => 
-        schedule.dayOfWeek === weekdays[weekday] && 
-        getTimeSlot(schedule.startTime, schedule.endTime) === period
-      )
-    );
-
-    if (!course) return null;
-
-    return (
-      <div className="p-2 bg-blue-50 rounded-lg border border-blue-200">
-        <p className="font-medium text-blue-900">{course.courseName}</p>
-        <p className="text-sm text-blue-700">{course.courseCode}</p>
-        <p className="text-sm text-blue-600">Phòng: {course.classroom}</p>
-        <p className="text-sm text-blue-600">GV: {course.professorName}</p>
-        <p className="text-xs text-blue-500">
-          {course.schedule.find(s => s.dayOfWeek === weekdays[weekday])?.startTime} - 
-          {course.schedule.find(s => s.dayOfWeek === weekdays[weekday])?.endTime}
-        </p>
-      </div>
-    );
-  };
+  function getScheduleCell(weekday, period) {
+    if (period < 6) {
+      // Các tiết bình thường
+      const courses = schedule.filter(course =>
+        course.schedule.some(s =>
+          s.dayOfWeek === weekdays[weekday] &&
+          getTimeSlot(s.startTime) === period
+        )
+      );
+      if (!courses.length) return null;
+      return (
+        <div className="flex flex-col gap-2">
+          {courses.map(course => {
+            const s = course.schedule.find(s =>
+              s.dayOfWeek === weekdays[weekday] && getTimeSlot(s.startTime) === period
+            );
+            return (
+              <div key={course.courseRegistrationId} className="p-2 bg-blue-50 rounded-lg border border-blue-200">
+                <p className="font-medium text-blue-900">{course.courseName}</p>
+                <p className="text-sm text-blue-700">{course.courseCode}</p>
+                <p className="text-sm text-blue-600">Phòng: {course.classroom}</p>
+                <p className="text-sm text-blue-600">GV: {course.professorName}</p>
+                <p className="text-xs text-blue-500">
+                  {s?.startTime} - {s?.endTime}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      );
+    } else {
+      // Dòng "Khác"
+      const courses = schedule.filter(course =>
+        course.schedule.some(s =>
+          s.dayOfWeek === weekdays[weekday] &&
+          getTimeSlot(s.startTime) === null
+        )
+      );
+      if (!courses.length) return null;
+      return (
+        <div className="flex flex-col gap-2">
+          {courses.map(course => {
+            const s = course.schedule.find(s =>
+              s.dayOfWeek === weekdays[weekday] && getTimeSlot(s.startTime) === null
+            );
+            return (
+              <div key={course.courseRegistrationId} className="p-2 bg-yellow-50 rounded-lg border border-yellow-200">
+                <p className="font-medium text-yellow-900">{course.courseName}</p>
+                <p className="text-sm text-yellow-700">{course.courseCode}</p>
+                <p className="text-sm text-yellow-600">Phòng: {course.classroom}</p>
+                <p className="text-sm text-yellow-600">GV: {course.professorName}</p>
+                <p className="text-xs text-yellow-500">
+                  {s?.startTime} - {s?.endTime}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+  }
 
   if (isLoading) {
     return (

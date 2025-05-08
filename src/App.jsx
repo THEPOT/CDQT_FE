@@ -28,7 +28,7 @@ import AdminEvaluationManagement from './components/evaluation/AdminEvaluationMa
 import CourseManagementProfessor from './components/professor/CourseManagement';
 import ProfessorManagement from './pages/admin/ProfessorManagement';
 import MySchedule from './pages/student/MySchedule';
-
+import MidtermEvaluation from './components/evaluation/MidtermEvaluation';
 function App() {
   return (
     <AuthProvider>
@@ -60,6 +60,7 @@ function App() {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="evaluations" element={<CourseEvaluation />} />
             <Route path="evaluation-management" element={<AdminEvaluationManagement />} />
+            <Route path="midterm-evaluation" element={<MidtermEvaluation />} />
             {/* Admin Routes */}
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
             <Route path="/student-management" element={<StudentInformationManagement />} />

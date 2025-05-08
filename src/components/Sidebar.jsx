@@ -20,6 +20,7 @@ function Sidebar() {
           { path: '/student-management', icon: <FiUsers />, label: 'Quản lý sinh viên' },
           { path: '/evaluations', icon: <FiBarChart2 />, label: 'Quản lý đánh giá' },
           { path: '/settings', icon: <FiSettings />, label: 'Cài đặt hệ thống' },
+          { path: '/midterm-evaluation', icon: <FiCheckSquare />, label: 'Đánh giá giữa kỳ' },
         ];
       case 'Student':
         return [
@@ -29,6 +30,8 @@ function Sidebar() {
           { path: '/transcript', icon: <FiClipboard />, label: 'Bảng điểm' },
           { path: '/evaluations', icon: <FiBarChart2 />, label: 'Khảo sát môn học' },
           { path: '/service-requests', icon: <FiMail />, label: 'Yêu cầu dịch vụ' },
+          { path: '/midterm-evaluation', icon: <FiCheckSquare />, label: 'Xem kết quả đánh giá giữa kỳ' },
+
         ];
       case 'Professor':
         return [
@@ -44,7 +47,8 @@ function Sidebar() {
           { path: '/staff-course-management', icon: <FiBook />, label: 'Quản lý môn học' },
           { path: '/evaluation-management', icon: <FiBarChart2 />, label: 'Quản lý khảo sát' },
           { path: '/service-requests', icon: <FiMail />, label: 'Quản lý yêu cầu' },
-        ];
+          { path: '/midterm-evaluation', icon: <FiCheckSquare />, label: 'Mở cổng đánh giá giữa kỳ' },
+        ]
       default:
         return [];
     }

@@ -7,6 +7,15 @@ function MidtermEvaluation({ userRole }) {
       {userRole === 'admin' && <AdminEvaluationView />}
       {userRole === 'professor' && <ProfessorEvaluationView />}
       {userRole === 'staff' && <StaffEvaluationView />}
+      {userRole === 'student' && <StudentEvaluationView />}
+    </div>
+  );
+}
+
+function StudentEvaluationView() {
+  return (
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold">Kết quả đánh giá giữa kỳ</h1>
     </div>
   );
 }

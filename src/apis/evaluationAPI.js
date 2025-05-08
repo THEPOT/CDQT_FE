@@ -2,6 +2,11 @@ import authorizedAxiosInstance from "@/utils/authorizedAxios";
 
 import { BASE_URL } from "@/configs/globalVariables";
 
+export const createMidtermEvaluationPeriod = async (periodData) => {
+  const response = await authorizedAxiosInstance.post(`${BASE_URL}/MidtermEvaluations/period`, periodData);
+  return response;
+};
+
 // Get current evaluation period
 export const getCurrentEvaluationPeriod = async () => {
   try {
