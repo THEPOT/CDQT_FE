@@ -1,8 +1,8 @@
-import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Layout from './components/Layout.jsx';
-import { ProtectedRoute } from './components/ProtectedRoute';
 import GuestRoute from './components/GuestRoute';
 import Login from './pages/Login.jsx';
 import Home from './pages/Home';
@@ -27,11 +27,24 @@ import Dashboard from './pages/Dashboard';
 import AdminEvaluationManagement from './components/evaluation/AdminEvaluationManagement';
 import CourseManagementProfessor from './components/professor/CourseManagement';
 import ProfessorManagement from './pages/admin/ProfessorManagement';
+import MySchedule from './pages/student/MySchedule';
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
         <Routes>
           <Route
             path="/login"
@@ -61,6 +74,7 @@ function App() {
             <Route path="/transcript" element={<Transcript />} />
             <Route path="/degree-audit" element={<DegreeAudit />} />
             <Route path="/services" element={<Services />} />
+            <Route path="/my-schedule" element={<MySchedule />} />
             
             {/* Teacher Routes */}
             <Route path="/teacher-dashboard" element={<TeacherDashboard />} />

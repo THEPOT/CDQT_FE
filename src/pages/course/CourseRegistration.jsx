@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { RiFilter2Line, RiSearchLine, RiCalendarLine, RiTimeLine, RiMapPin2Line, RiUser2Line } from 'react-icons/ri';
+import { useState, useEffect } from 'react';
 import { getCourseAPI, registerCourseAPI } from '../../apis/courseAPI';
+import { toast } from 'react-toastify';
 
 function CourseRegistration() {
   const [selectedCourses, setSelectedCourses] = useState([]);
@@ -20,16 +20,16 @@ function CourseRegistration() {
   const fetchCourses = async () => {
     try {
       const response = await getCourseAPI();
-      setCourses(response.data);
+      setCourses(response.data.items);
     } catch (error) {
       console.error('Error fetching course data:', error);
-      // Thêm thông báo lỗi ở đây
+      toast.error('Không thể tải danh sách môn học. Vui lòng thử lại sau!');
     }
   };
 
   const handleSelectCourse = (course) => {
-    if (selectedCourses.some(c => c.id === course.id)) {
-      setSelectedCourses(selectedCourses.filter(c => c.id !== course.id));
+    if (selectedCourses.some(c => c.courseOfferingId === course.courseOfferingId)) {
+      setSelectedCourses(selectedCourses.filter(c => c.courseOfferingId !== course.courseOfferingId));
     } else {
       setSelectedCourses([...selectedCourses, course]);
     }
@@ -41,14 +41,13 @@ function CourseRegistration() {
       // Đăng ký từng môn học
       for (const course of selectedCourses) {
         console.log('Registering course:', course.courseOfferingId);
-        
         await registerCourseAPI({ CourseOfferingId: course.courseOfferingId });
       }
-      // Thêm thông báo thành công
+      toast.success('Đăng ký môn học thành công!');
       setSelectedCourses([]); // Clear selection after successful registration
     } catch (error) {
       console.error('Error registering courses:', error);
-      // Thêm thông báo lỗi
+      toast.error('Đăng ký môn học thất bại. Vui lòng thử lại sau!');
     } finally {
       setIsLoading(false);
     }
@@ -76,7 +75,7 @@ function CourseRegistration() {
             {/* Course List */}
             <div className="divide-y">
               {courses.map((course) => {
-                const isSelected = selectedCourses.some(c => c.id === course.id);
+                const isSelected = selectedCourses.some(c => c.courseOfferingId === course.courseOfferingId);
                 
                 return (
                   <div key={course.id} className="py-4">

@@ -1,4 +1,3 @@
-import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -26,7 +25,7 @@ function Sidebar() {
         return [
           
           { path: '/course-registration', icon: <FiBook />, label: 'Đăng ký môn học' },
-          { path: '/my-courses', icon: <FiFileText />, label: 'Môn học của tôi' },
+          { path: '/my-schedule', icon: <FiFileText />, label: 'Lịch học của tôi' },
           { path: '/transcript', icon: <FiClipboard />, label: 'Bảng điểm' },
           { path: '/evaluations', icon: <FiBarChart2 />, label: 'Khảo sát môn học' },
           { path: '/service-requests', icon: <FiMail />, label: 'Yêu cầu dịch vụ' },
