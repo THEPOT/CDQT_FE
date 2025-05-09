@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { FiSettings, FiCalendar, FiSend, FiDownload, FiEye } from 'react-icons/fi';
-import { 
-  getCurrentEvaluationPeriod, 
-  updateEvaluationPeriod, 
-  sendEvaluationResults, 
-  exportEvaluationResults, 
+import { FiSettings, FiCalendar, FiSend, FiDownload } from 'react-icons/fi';
+import { toast } from 'react-toastify';
+import {
+  getEvaluationQuestionsAPI,
+  createEvaluationQuestionAPI,
+  updateEvaluationQuestionAPI,
+  deleteEvaluationQuestionAPI,
+  createEvaluationPeriodAPI,
+  getCurrentEvaluationPeriod,
+  updateEvaluationPeriod,
+  sendEvaluationResults,
+  exportEvaluationResults,
   getEvaluationPeriods
 } from '../../apis/evaluationAPI';
 import { getSemestersAPI } from '../../apis/termAPI';
@@ -20,173 +26,117 @@ function AdminEvaluationManagement() {
     endDate: '',
     isActive: false
   });
-  const [allPeriods, setAllPeriods] = useState([]);
-  const [loadingPeriods, setLoadingPeriods] = useState(false);
-  const [selectedSemesterId, setSelectedSemesterId] = useState('');
+  const [questions, setQuestions] = useState([]);
 
   useEffect(() => {
-    loadCurrentPeriod();
-    loadSemesters();
+    loadInitialData();
   }, []);
 
-  useEffect(() => {
-    if (selectedSemesterId) {
-      loadAllPeriods(selectedSemesterId);
-    }
-  }, [selectedSemesterId]);
-
-  const loadSemesters = async () => {
+  const loadInitialData = async () => {
     try {
       setIsLoading(true);
-      const response = await getSemestersAPI();
-      const items = Array.isArray(response.data.items) ? response.data.items : [];
-      setSemesters(items);
-      if (items.length > 0) {
-        setSelectedSemesterId(items[0].id);
+      const [currentPeriodRes, semestersRes, questionsRes] = await Promise.all([
+        getCurrentEvaluationPeriod(),
+        getSemestersAPI(),
+        getEvaluationQuestionsAPI()
+      ]);
+      
+      setCurrentPeriod(currentPeriodRes.data);
+      setSemesters(semestersRes.data.items);
+      setQuestions(questionsRes.data);
+      
+      if (currentPeriodRes.data) {
+        setPeriodData({
+          semesterId: currentPeriodRes.data.semesterId,
+          startDate: currentPeriodRes.data.startDate,
+          endDate: currentPeriodRes.data.endDate,
+          isActive: currentPeriodRes.data.isActive
+        });
       }
     } catch (error) {
-      console.error('Failed to load semesters:', error);
-      setSemesters([]);
+      console.error('Error loading initial data:', error);
+      toast.error('Không thể tải dữ liệu. Vui lòng thử lại sau!');
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const loadCurrentPeriod = async () => {
-    try {
-      const response = await getCurrentEvaluationPeriod();
-      setCurrentPeriod(response.data);
-      setPeriodData({
-        semesterId: response.data.semesterId,
-        startDate: response.data.startDate,
-        endDate: response.data.endDate,
-        isActive: response.data.isActive
-      });
-    } catch (error) {
-      console.error('Failed to load evaluation period:', error);
     }
   };
 
   const handleUpdatePeriod = async (e) => {
     e.preventDefault();
     try {
+      setIsLoading(true);
       await updateEvaluationPeriod(periodData);
+      await loadInitialData();
       setIsEditing(false);
-      loadCurrentPeriod();
+      toast.success('Cập nhật thành công!');
     } catch (error) {
-      console.error('Failed to update evaluation period:', error);
+      console.error('Error updating period:', error);
+      toast.error('Không thể cập nhật. Vui lòng thử lại!');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleSendResults = async () => {
+    if (!currentPeriod?.semesterId) {
+      toast.warning('Vui lòng chọn kỳ học!');
+      return;
+    }
+
     try {
+      setIsLoading(true);
       await sendEvaluationResults(currentPeriod.semesterId);
-      // Show success message
+      toast.success('Đã gửi kết quả đánh giá cho giảng viên!');
     } catch (error) {
-      console.error('Failed to send results:', error);
-    }
-  };
-
-  const handleExportResults = async (type) => {
-    try {
-      await exportEvaluationResults(currentPeriod.semesterId, type);
-    } catch (error) {
-      console.error('Failed to export results:', error);
-    }
-  };
-
-  const loadAllPeriods = async (semesterId) => {
-    if (!semesterId) return;
-    try {
-      setLoadingPeriods(true);
-      const response = await getEvaluationPeriods(semesterId, 1, 20);
-      setAllPeriods(Array.isArray(response.data.items) ? response.data.items : []);
-    } catch (error) {
-      setAllPeriods([]);
-      console.error('Failed to load all evaluation periods:', error);
+      console.error('Error sending results:', error);
+      toast.error('Không thể gửi kết quả. Vui lòng thử lại!');
     } finally {
-      setLoadingPeriods(false);
+      setIsLoading(false);
+    }
+  };
+
+  const handleExport = async (type) => {
+    if (!currentPeriod?.semesterId) {
+      toast.warning('Vui lòng chọn kỳ học!');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const response = await exportEvaluationResults(currentPeriod.semesterId, type);
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `evaluations-${type}-${currentPeriod.semesterId}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      toast.success('Tải xuống báo cáo thành công!');
+    } catch (error) {
+      console.error('Error exporting results:', error);
+      toast.error('Không thể tải xuống báo cáo. Vui lòng thử lại!');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="container mx-auto p-4">
-      {/* Filter semester */}
-      <div className="mb-4 flex items-center gap-2">
-        <span className="font-medium">Chọn học kỳ:</span>
-        <select
-          className="select select-bordered"
-          value={selectedSemesterId}
-          onChange={e => setSelectedSemesterId(e.target.value)}
-        >
-          {semesters.map(semester => (
-            <option key={semester.id} value={semester.id}>
-              {semester.name} - {semester.academicYear}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Danh sách các kỳ đánh giá */}
-      <div className="card bg-base-100 shadow mb-6">
-        <div className="card-body">
-          <h2 className="card-title mb-2">Danh sách các kỳ đánh giá</h2>
-          {loadingPeriods ? (
-            <div>Đang tải...</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="table w-full">
-                <thead>
-                  <tr>
-                    <th>Kỳ</th>
-                    <th>Bắt đầu</th>
-                    <th>Kết thúc</th>
-                    <th>Trạng thái</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {allPeriods.map(period => (
-                    <tr key={period.id}>
-                      <td>{period.semesterName || period.semesterId}</td>
-                      <td>{new Date(period.startDate).toLocaleString()}</td>
-                      <td>{new Date(period.endDate).toLocaleString()}</td>
-                      <td>
-                        <span className={`badge ${period.isActive ? 'badge-success' : 'badge-error'}`}>
-                          {period.isActive ? 'Đang hoạt động' : 'Đã đóng'}
-                        </span>
-                      </td>
-                      <td>
-                        <button
-                          className="btn btn-xs btn-outline"
-                          onClick={() => setCurrentPeriod(period)}
-                          title="Xem chi tiết"
-                        >
-                          <FiEye />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Quản lý Hệ thống Đánh giá</h1>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Quản lý Đánh giá</h1>
         <div className="flex gap-2">
           <button 
-            className="btn btn-primary"
+            className="btn btn-outline"
             onClick={() => setIsEditing(true)}
+            disabled={isLoading}
           >
             <FiSettings className="mr-2" />
             Cài đặt
           </button>
           <button 
-            className="btn btn-secondary"
+            className="btn btn-primary"
             onClick={handleSendResults}
+            disabled={isLoading || !currentPeriod?.semesterId}
           >
             <FiSend className="mr-2" />
             Gửi kết quả
@@ -195,70 +145,49 @@ function AdminEvaluationManagement() {
       </div>
 
       {/* Current Period Status */}
-      <div className="card bg-base-100 shadow mb-6">
-        <div className="card-body">
-          <h2 className="card-title">
-            <FiCalendar className="mr-2" />
-            Kỳ đánh giá hiện tại
-          </h2>
-          
-          {currentPeriod && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-gray-600">Học kỳ</p>
-                <p className="font-medium">{currentPeriod.semesterName}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Trạng thái</p>
-                <div className={`badge ${currentPeriod.isCurrentlyOpen ? 'badge-success' : 'badge-error'}`}>
-                  {currentPeriod.isCurrentlyOpen ? 'Đang mở' : 'Đã đóng'}
-                </div>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Thời gian bắt đầu</p>
-                <p className="font-medium">
-                  {new Date(currentPeriod.startDate).toLocaleDateString()}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Thời gian kết thúc</p>
-                <p className="font-medium">
-                  {new Date(currentPeriod.endDate).toLocaleDateString()}
-                </p>
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-lg font-semibold mb-4 flex items-center">
+          <FiCalendar className="mr-2" />
+          Đợt đánh giá hiện tại
+        </h2>
+        
+        {currentPeriod ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm text-gray-600">Học kỳ</p>
+              <p className="font-medium">{currentPeriod.semesterName}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">Trạng thái</p>
+              <div className={`badge ${currentPeriod.isActive ? 'badge-success' : 'badge-error'}`}>
+                {currentPeriod.isActive ? 'Đang mở' : 'Đã đóng'}
               </div>
             </div>
-          )}
-        </div>
-      </div>
-
-      {/* Export Options */}
-      <div className="card bg-base-100 shadow mb-6">
-        <div className="card-body">
-          <h2 className="card-title mb-4">Xuất kết quả đánh giá</h2>
-          <div className="flex gap-4">
-            <button 
-              className="btn btn-outline"
-              onClick={() => handleExportResults('courses')}
-            >
-              <FiDownload className="mr-2" />
-              Xuất theo môn học
-            </button>
-            <button 
-              className="btn btn-outline"
-              onClick={() => handleExportResults('professors')}
-            >
-              <FiDownload className="mr-2" />
-              Xuất theo giảng viên
-            </button>
+            <div>
+              <p className="text-sm text-gray-600">Thời gian bắt đầu</p>
+              <p className="font-medium">
+                {new Date(currentPeriod.startDate).toLocaleDateString('vi-VN')}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">Thời gian kết thúc</p>
+              <p className="font-medium">
+                {new Date(currentPeriod.endDate).toLocaleDateString('vi-VN')}
+              </p>
+            </div>
           </div>
-        </div>
+        ) : (
+          <p className="text-gray-500 text-center py-4">
+            Chưa có đợt đánh giá nào được thiết lập
+          </p>
+        )}
       </div>
 
       {/* Edit Period Modal */}
       {isEditing && (
         <div className="modal modal-open">
           <div className="modal-box">
-            <h3 className="font-bold text-lg mb-4">Cài đặt kỳ đánh giá</h3>
+            <h3 className="font-bold text-lg mb-4">Cài đặt đợt đánh giá</h3>
             
             <form onSubmit={handleUpdatePeriod} className="space-y-4">
               <div className="form-control">
@@ -268,18 +197,14 @@ function AdminEvaluationManagement() {
                   value={periodData.semesterId}
                   onChange={(e) => setPeriodData({...periodData, semesterId: e.target.value})}
                   required
-                  disabled={isLoading}
                 >
                   <option value="">Chọn học kỳ...</option>
-                  {Array.isArray(semesters) && semesters.map((semester) => (
+                  {semesters.map((semester) => (
                     <option key={semester.id} value={semester.id}>
-                      {semester.name} - {semester.academicYear}
+                      {semester.semesterName}
                     </option>
                   ))}
                 </select>
-                {isLoading && (
-                  <span className="loading loading-spinner loading-sm"></span>
-                )}
               </div>
 
               <div className="form-control">
@@ -309,7 +234,7 @@ function AdminEvaluationManagement() {
                   <span>Kích hoạt đánh giá</span>
                   <input 
                     type="checkbox"
-                    className="toggle toggle-primary ml-2"
+                    className="toggle toggle-primary"
                     checked={periodData.isActive}
                     onChange={(e) => setPeriodData({...periodData, isActive: e.target.checked})}
                   />
@@ -324,16 +249,43 @@ function AdminEvaluationManagement() {
                 >
                   Hủy
                 </button>
-                <button type="submit" className="btn btn-primary">
-                  Lưu thay đổi
+                <button 
+                  type="submit" 
+                  className="btn btn-primary"
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Đang lưu...' : 'Lưu thay đổi'}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
+
+      {/* Export Options */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-lg font-semibold mb-4">Xuất báo cáo đánh giá</h2>
+        <div className="flex gap-4">
+          <button 
+            className="btn btn-outline"
+            onClick={() => handleExport('courses')}
+            disabled={isLoading || !currentPeriod?.semesterId}
+          >
+            <FiDownload className="mr-2" />
+            Xuất theo môn học
+          </button>
+          <button 
+            className="btn btn-outline"
+            onClick={() => handleExport('professors')}
+            disabled={isLoading || !currentPeriod?.semesterId}
+          >
+            <FiDownload className="mr-2" />
+            Xuất theo giảng viên
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
 
-export default AdminEvaluationManagement; 
+export default AdminEvaluationManagement;

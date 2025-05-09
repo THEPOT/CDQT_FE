@@ -1,30 +1,93 @@
-import React, { useState } from 'react';
-import { RiFileTextLine, RiSendPlane2Line, RiAttachmentLine } from 'react-icons/ri';
+import React, { useState, useEffect } from 'react';
+import { RiSendPlane2Line, RiAttachmentLine, RiFileTextLine, RiCalendarLine } from 'react-icons/ri';
+import { useAuth } from '../contexts/AuthContext';
+import { toast } from 'react-toastify';
+import { createServiceRequestAPI, getServiceRequestsAPI } from '../apis/serviceAPI';
 
 function Services() {
-  const [selectedService, setSelectedService] = useState('');
+  const { user } = useAuth();
+  const [requestType, setRequestType] = useState('');
   const [requestDetails, setRequestDetails] = useState('');
   const [attachments, setAttachments] = useState([]);
-  const [requests, setRequests] = useState([
-    {
-      id: 1,
-      type: 'transcript',
-      status: 'pending',
-      date: '2024-03-15',
-      details: 'Xin cấp bảng điểm tiếng Anh'
-    },
-    {
-      id: 2,
-      type: 'certificate',
-      status: 'approved',
-      date: '2024-03-10',
-      details: 'Xin giấy xác nhận sinh viên'
-    }
-  ]);
+  const [requests, setRequests] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    fetchRequests();
+  }, []);
+
+  const fetchRequests = async () => {
+    try {
+      const response = await getServiceRequestsAPI({ studentId: user.id });
+      setRequests(response.data);
+    } catch (error) {
+      console.error('Error fetching requests:', error);
+      toast.error('Không thể tải danh sách yêu cầu');
+    }
+  };
+
+  const serviceTypes = [
+    { value: 'Certificate', label: 'Giấy xác nhận sinh viên' },
+    { value: 'Transcript', label: 'Cấp bảng điểm' },
+    { value: 'LeaveOfAbsence', label: 'Xin phép nghỉ học' },
+    { value: 'CreditOverload', label: 'Đăng ký học vượt' },
+    { value: 'ProgramChange', label: 'Đăng ký đổi ngành học' },
+    { value: 'AddDrop', label: 'Điều chỉnh đăng ký môn' },
+    { value: 'Withdraw', label: 'Đăng ký hủy môn' },
+    { value: 'Graduation', label: 'Đăng ký xét tốt nghiệp' },
+    { value: 'AcademicAdvising', label: 'Đặt lịch tư vấn học thuật' },
+    { value: 'ClassroomBorrow', label: 'Mượn phòng học' },
+    { value: 'TemporaryWithdraw', label: 'Đăng ký bảo lưu' },
+    { value: 'PermanentWithdraw', label: 'Đăng ký thôi học' },
+    { value: 'Other', label: 'Yêu cầu khác' }
+  ];
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission
+    if (!requestType || !requestDetails.trim()) {
+      toast.error('Vui lòng điền đầy đủ thông tin yêu cầu');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      await createServiceRequestAPI({
+        studentId: user.id,
+        serviceType: requestType,
+        details: requestDetails
+      });
+      
+      toast.success('Gửi yêu cầu thành công');
+      setRequestType('');
+      setRequestDetails('');
+      setAttachments([]);
+      fetchRequests();
+    } catch (error) {
+      console.error('Error submitting request:', error);
+      toast.error('Có lỗi xảy ra khi gửi yêu cầu');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    const statusStyles = {
+      Pending: 'bg-yellow-100 text-yellow-800',
+      Approved: 'bg-green-100 text-green-800',
+      Denied: 'bg-red-100 text-red-800'
+    };
+    
+    const statusLabels = {
+      Pending: 'Chờ xử lý',
+      Approved: 'Đã duyệt',
+      Denied: 'Từ chối'
+    };
+
+    return (
+      <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusStyles[status] || statusStyles.Pending}`}>
+        {statusLabels[status] || 'Chờ xử lý'}
+      </span>
+    );
   };
 
   return (
@@ -47,14 +110,17 @@ function Services() {
                   </label>
                   <select
                     className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    value={selectedService}
-                    onChange={(e) => setSelectedService(e.target.value)}
+                    value={requestType}
+                    onChange={(e) => setRequestType(e.target.value)}
+                    required
+                    disabled={isLoading}
                   >
                     <option value="">Chọn loại yêu cầu...</option>
-                    <option value="transcript">Xin cấp bảng điểm</option>
-                    <option value="certificate">Giấy xác nhận sinh viên</option>
-                    <option value="leave">Đơn xin nghỉ học</option>
-                    <option value="other">Yêu cầu khác</option>
+                    {serviceTypes.map(type => (
+                      <option key={type.value} value={type.value}>
+                        {type.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -68,6 +134,8 @@ function Services() {
                     value={requestDetails}
                     onChange={(e) => setRequestDetails(e.target.value)}
                     placeholder="Mô tả chi tiết yêu cầu của bạn..."
+                    required
+                    disabled={isLoading}
                   />
                 </div>
 
@@ -91,6 +159,7 @@ function Services() {
                             className="sr-only"
                             multiple
                             onChange={(e) => setAttachments(Array.from(e.target.files))}
+                            disabled={isLoading}
                           />
                         </label>
                         <p className="pl-1">hoặc kéo thả vào đây</p>
@@ -105,10 +174,11 @@ function Services() {
                 <div className="flex justify-end">
                   <button
                     type="submit"
-                    className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                    className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={isLoading}
                   >
                     <RiSendPlane2Line />
-                    <span>Gửi yêu cầu</span>
+                    <span>{isLoading ? 'Đang gửi...' : 'Gửi yêu cầu'}</span>
                   </button>
                 </div>
               </form>
@@ -135,26 +205,37 @@ function Services() {
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900">
-                      {request.details}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      Ngày gửi: {new Date(request.date).toLocaleDateString('vi-VN')}
-                    </p>
-                  </div>
-                  <div>
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        request.status === 'approved'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}
-                    >
-                      {request.status === 'approved' ? 'Đã duyệt' : 'Đang xử lý'}
-                    </span>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">
+                          {serviceTypes.find(t => t.value === request.serviceType)?.label}
+                        </p>
+                        <p className="text-sm text-gray-500 mt-1">
+                          {request.details}
+                        </p>
+                      </div>
+                      {getStatusBadge(request.status)}
+                    </div>
+                    {request.staffComments && (
+                      <div className="mt-2 p-2 bg-gray-50 rounded-lg text-sm text-gray-600">
+                        <p className="font-medium">Phản hồi:</p>
+                        <p>{request.staffComments}</p>
+                      </div>
+                    )}
+                    <div className="mt-2 flex items-center text-xs text-gray-500">
+                      <RiCalendarLine className="mr-1" />
+                      <time dateTime={request.requestDate}>
+                        {new Date(request.requestDate).toLocaleDateString('vi-VN')}
+                      </time>
+                    </div>
                   </div>
                 </div>
               ))}
+              {requests.length === 0 && (
+                <div className="text-center text-gray-500 py-4">
+                  Chưa có yêu cầu nào
+                </div>
+              )}
             </div>
           </div>
         </div>

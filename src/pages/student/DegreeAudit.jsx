@@ -1,7 +1,9 @@
-import React from 'react';
-import { RiDownloadLine, RiCheckLine, RiTimeLine } from 'react-icons/ri';
+import React, { useState } from 'react';
+import { FiDownload, FiCheckCircle, FiClock } from 'react-icons/fi';
 
 function DegreeAudit() {
+  const [selectedCategory, setSelectedCategory] = useState('all');
+
   const auditData = {
     student: {
       name: 'Nguyễn Văn A',
@@ -13,9 +15,9 @@ function DegreeAudit() {
       requiredCredits: 130,
       gpa: 3.65
     },
-    requirements: [
+    categories: [
       {
-        category: 'Kiến thức đại cương',
+        name: 'Kiến thức đại cương',
         completed: 30,
         required: 35,
         courses: [
@@ -35,7 +37,7 @@ function DegreeAudit() {
         ]
       },
       {
-        category: 'Kiến thức cơ sở ngành',
+        name: 'Kiến thức cơ sở ngành',
         completed: 40,
         required: 45,
         courses: [
@@ -68,37 +70,92 @@ function DegreeAudit() {
           </p>
         </div>
         <button className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700">
-          <RiDownloadLine />
+          <FiDownload />
           <span>Xuất báo cáo</span>
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="md:col-span-3 space-y-6">
-          {auditData.requirements.map((requirement) => (
+          {auditData.categories.map((category) => (
             <div
-              key={requirement.category}
+              key={category.name}
               className="bg-white rounded-xl shadow-sm"
             >
               <div className="p-6 border-b border-gray-200">
                 <div className="flex justify-between items-center">
                   <h2 className="text-lg font-medium text-gray-900">
-                    {requirement.category}
+                    {category.name}
                   </h2>
                   <div className="text-right">
                     <p className="text-sm text-gray-500">
-                      Hoàn thành: {requirement.completed}/{requirement.required} tín chỉ
+                      Hoàn thành: {category.completed}/{category.required} tín chỉ
                     </p>
                     <div className="w-32 h-2 bg-gray-200 rounded-full mt-2">
                       <div
                         className="h-2 bg-blue-600 rounded-full"
                         style={{
-                          width: `${(requirement.completed / requirement.required) * 100}%`
+                          width: `${(category.completed / category.required) * 100}%`
                         }}
                       />
                     </div>
                   </div>
                 </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Mã môn
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Tên môn học
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Tín chỉ
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Trạng thái
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Điểm
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {category.courses.map((course) => (
+                      <tr key={course.code}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {course.code}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {course.name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {course.credits}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {course.status === 'completed' ? (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              <FiCheckCircle className="mr-1" />
+                              Đã hoàn thành
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                              <FiClock className="mr-1" />
+                              Đang học
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {course.grade || '-'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           ))}
@@ -126,6 +183,20 @@ function DegreeAudit() {
                     />
                   </div>
                 </div>
+              </div>
+
+              <div>
+                <p className="text-sm text-gray-500">GPA Tích lũy</p>
+                <p className="text-3xl font-bold text-blue-600">
+                  {auditData.student.gpa}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-sm text-gray-500">Dự kiến tốt nghiệp</p>
+                <p className="text-lg font-semibold text-gray-900">
+                  {auditData.student.expectedGraduation}
+                </p>
               </div>
             </div>
           </div>

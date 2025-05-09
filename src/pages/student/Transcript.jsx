@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { RiDownloadLine, RiPrinterLine } from 'react-icons/ri';
-import { getTranscriptAPI } from '../../apis/transcriptAPI';
+import { getTranscriptAPI, exportTranscriptAPI } from '../../apis/transcriptAPI';
+import { toast } from 'react-toastify';
 
 function Transcript() {
   const [selectedSemester, setSelectedSemester] = useState('all');
@@ -11,8 +12,9 @@ function Transcript() {
     cumulativeGPA: 0,
     totalCredits: 0,
     totalCreditsPassed: 0,
-    semesters: []
+    terms: []
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     fetchTranscript();
@@ -20,12 +22,40 @@ function Transcript() {
 
   const fetchTranscript = async () => {
     try {
+      setIsLoading(true);
       const response = await getTranscriptAPI();
       setTranscriptData(response.data);
     } catch (error) {
       console.error('Error fetching transcript data:', error);
+      toast.error('Không thể tải bảng điểm. Vui lòng thử lại sau!');
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  const handleExport = async (format) => {
+    try {
+      const response = await exportTranscriptAPI(format);
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `transcript.${format}`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error('Error exporting transcript:', error);
+      toast.error('Không thể tải xuống bảng điểm. Vui lòng thử lại sau!');
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -37,13 +67,19 @@ function Transcript() {
           </p>
         </div>
         <div className="flex gap-2">
-          <button className="flex items-center gap-2 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
-            <RiPrinterLine />
-            <span>In bảng điểm</span>
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+          <button 
+            className="flex items-center gap-2 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+            onClick={() => handleExport('pdf')}
+          >
             <RiDownloadLine />
             <span>Tải PDF</span>
+          </button>
+          <button 
+            className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+            onClick={() => handleExport('excel')}
+          >
+            <RiDownloadLine />
+            <span>Tải Excel</span>
           </button>
         </div>
       </div>
@@ -56,16 +92,18 @@ function Transcript() {
             onChange={(e) => setSelectedSemester(e.target.value)}
           >
             <option value="all">Tất cả học kỳ</option>
-            {transcriptData.semesters.map((semester, index) => (
-              <option key={index} value={semester.semesterName}>
-                {semester.semesterName}
+            {transcriptData.terms?.map((term, index) => (
+              <option key={index} value={term.termName}>
+                {term.termName}
               </option>
             ))}
           </select>
 
           <div className="bg-blue-50 p-4 rounded-lg">
             <div className="text-sm text-gray-600">GPA Tích lũy</div>
-            <div className="text-2xl font-bold text-blue-600">{transcriptData.cumulativeGPA.toFixed(2)}</div>
+            <div className="text-2xl font-bold text-blue-600">
+              {transcriptData.cumulativeGPA?.toFixed(2)}
+            </div>
           </div>
         </div>
 
@@ -82,26 +120,28 @@ function Transcript() {
             </tr>
           </thead>
           <tbody>
-            {transcriptData.semesters.map((semester) => 
-              semester.courses.map((course) => (
-                <tr key={course.courseCode} className="border-b">
-                  <td className="py-3">{course.courseCode}</td>
-                  <td className="py-3">{course.courseName}</td>
-                  <td className="text-center py-3">{course.credits}</td>
-                  <td className="text-center py-3">{course.midtermScore}</td>
-                  <td className="text-center py-3">{course.finalScore}</td>
-                  <td className="text-center py-3">{course.letterGrade}</td>
-                  <td className="text-center py-3">
-                    <span className={`px-2 py-1 rounded text-sm ${
-                      course.result === 'Đạt' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {course.result}
-                    </span>
-                  </td>
-                </tr>
-              ))
+            {transcriptData.terms?.map((term) => 
+              term.courses
+                .filter(() => selectedSemester === 'all' || selectedSemester === term.termName)
+                .map((course) => (
+                  <tr key={course.courseCode} className="border-b">
+                    <td className="py-3">{course.courseCode}</td>
+                    <td className="py-3">{course.courseName}</td>
+                    <td className="text-center py-3">{course.credits}</td>
+                    <td className="text-center py-3">{course.midtermGrade || '-'}</td>
+                    <td className="text-center py-3">{course.finalGrade || '-'}</td>
+                    <td className="text-center py-3">{course.gradeValue}</td>
+                    <td className="text-center py-3">
+                      <span className={`px-2 py-1 rounded text-sm ${
+                        course.isPassed 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {course.isPassed ? 'Đạt' : 'Không đạt'}
+                      </span>
+                    </td>
+                  </tr>
+                ))
             )}
           </tbody>
         </table>
@@ -111,4 +151,3 @@ function Transcript() {
 }
 
 export default Transcript;
-

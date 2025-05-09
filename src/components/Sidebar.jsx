@@ -2,7 +2,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   FiHome, FiBook, FiUsers, FiFileText, FiSettings,
-  FiClipboard, FiBarChart2, FiCalendar, FiMail, FiCheckSquare
+  FiClipboard, FiBarChart2, FiCalendar, FiMail, FiCheckSquare,
+  FiInfo, FiAward, FiClock
 } from 'react-icons/fi';
 
 function Sidebar() {
@@ -10,7 +11,6 @@ function Sidebar() {
   const location = useLocation();
 
   const getMenuItems = () => {
-
     switch (user?.role) {
       case 'Admin':
         return [
@@ -21,34 +21,42 @@ function Sidebar() {
           { path: '/evaluations', icon: <FiBarChart2 />, label: 'Quản lý đánh giá' },
           { path: '/settings', icon: <FiSettings />, label: 'Cài đặt hệ thống' },
           { path: '/midterm-evaluation', icon: <FiCheckSquare />, label: 'Đánh giá giữa kỳ' },
+          { path: '/admin-services', icon: <FiMail />, label: 'Quản lý dịch vụ' },
+          { path: '/degree-audit-management', icon: <FiAward />, label: 'Quản lý lộ trình' },
+          { path: '/transcript-management', icon: <FiFileText />, label: 'Quản lý bảng điểm' }
         ];
       case 'Student':
         return [
-          
+          { path: '/student-info', icon: <FiInfo />, label: 'Thông tin cá nhân' },
           { path: '/course-registration', icon: <FiBook />, label: 'Đăng ký môn học' },
-          { path: '/my-schedule', icon: <FiFileText />, label: 'Lịch học của tôi' },
+          { path: '/my-schedule', icon: <FiClock />, label: 'Lịch học của tôi' },
           { path: '/transcript', icon: <FiClipboard />, label: 'Bảng điểm' },
+          { path: '/degree-audit', icon: <FiAward />, label: 'Lộ trình học tập' },
           { path: '/evaluations', icon: <FiBarChart2 />, label: 'Khảo sát môn học' },
-          { path: '/service-requests', icon: <FiMail />, label: 'Yêu cầu dịch vụ' },
-          { path: '/midterm-evaluation', icon: <FiCheckSquare />, label: 'Xem kết quả đánh giá giữa kỳ' },
-
+          { path: '/services', icon: <FiMail />, label: 'Yêu cầu dịch vụ' },
+          { path: '/midterm-evaluation', icon: <FiCheckSquare />, label: 'Xem kết quả đánh giá giữa kỳ' }
         ];
       case 'Professor':
         return [
-          {path : 'courses', icon: <FiBook />, label: 'Môn học'},
-          { path: '/my-classes', icon: <FiBook />, label: 'Lớp học của tôi' },
+          { path: '/teacher-dashboard', icon: <FiHome />, label: 'Trang chủ' },
+          { path: '/courses', icon: <FiBook />, label: 'Môn học' },
+          { path: '/my-classes', icon: <FiUsers />, label: 'Lớp học của tôi' },
+          { path: '/grade-management', icon: <FiClipboard />, label: 'Quản lý điểm' },
           { path: '/midterm-evaluation', icon: <FiCheckSquare />, label: 'Đánh giá giữa kỳ' },
           { path: '/course-evaluation', icon: <FiBarChart2 />, label: 'Kết quả khảo sát' },
+          { path: '/professor-services', icon: <FiMail />, label: 'Dịch vụ' }
         ];
       case 'Staff':
         return [
-        
+          { path: '/staff-dashboard', icon: <FiHome />, label: 'Trang chủ' },
           { path: '/term-management', icon: <FiCalendar />, label: 'Quản lý học kỳ' },
           { path: '/staff-course-management', icon: <FiBook />, label: 'Quản lý môn học' },
           { path: '/evaluation-management', icon: <FiBarChart2 />, label: 'Quản lý khảo sát' },
-          { path: '/service-requests', icon: <FiMail />, label: 'Quản lý yêu cầu' },
+          { path: '/staff-services', icon: <FiMail />, label: 'Quản lý yêu cầu' },
           { path: '/midterm-evaluation', icon: <FiCheckSquare />, label: 'Mở cổng đánh giá giữa kỳ' },
-        ]
+          { path: '/degree-audit-management', icon: <FiAward />, label: 'Quản lý lộ trình' },
+          { path: '/transcript-management', icon: <FiFileText />, label: 'Quản lý bảng điểm' }
+        ];
       default:
         return [];
     }

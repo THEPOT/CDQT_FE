@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import StudentEvaluation from './StudentEvaluation';
 import ProfessorEvaluation from './ProfessorEvaluation';
@@ -31,4 +31,4 @@ function CourseEvaluation() {
   );
 }
 
-export default CourseEvaluation; 
+export default CourseEvaluation;

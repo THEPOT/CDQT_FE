@@ -12,8 +12,7 @@
   "dependencies": {
     "@headlessui/react": "^1.7.18",
     "@heroicons/react": "^2.1.1",
-    "@rollup/rollup-win32-x64-msvc": "^4.39.0",
-    "@supabase/supabase-js": "^2.39.7",
+    "@rollup/rollup-win32-x64-msvc": "^4.40.2",
     "axios": "^1.7.9",
     "clsx": "^2.1.0",
     "daisyui": "^4.7.2",
