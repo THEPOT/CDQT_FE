@@ -2,7 +2,7 @@ import authorizedAxiosInstance from "@/utils/authorizedAxios";
 import { BASE_URL } from "@/configs/globalVariables";
 
 export const getTranscriptAPI = async () => {
-  return await authorizedAxiosInstance.get(`${BASE_URL}/Students/me/detailed-transcript`);
+  return await authorizedAxiosInstance.get(`${BASE_URL}/Students/transcripts`);
 };
 
 export const exportTranscriptAPI = async (format) => {

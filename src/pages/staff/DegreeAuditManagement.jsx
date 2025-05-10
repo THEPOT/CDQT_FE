@@ -7,14 +7,20 @@ import {
   getBatchProgressAPI,
   exportAuditReportAPI
 } from '../../apis/degreeAuditAPI';
+import { getSemestersAPI } from '../../apis/termAPI';
+import { getMajorsAPI } from '../../apis/majorAPI';
 
 function DegreeAuditManagement() {
   const [selectedProgram, setSelectedProgram] = useState('');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedTerm, setSelectedTerm] = useState('1');
+  const [semesters, setSemesters] = useState([]);
+  const [majors, setMajors] = useState([]);
   const [requirements, setRequirements] = useState({
-    totalCredits: 130,
-    categories: []
+    programId: '',
+    majorName: '',
+    requiredCredits: 0,
+    requirements: []
   });
   const [batchProgress, setBatchProgress] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -30,6 +36,21 @@ function DegreeAuditManagement() {
       fetchProgramRequirements();
     }
   }, [selectedProgram]);
+
+  useEffect(() => {
+    fetchSemesters();
+    fetchMajor();
+  }, []);
+
+  const fetchSemesters = async () => {
+    const response = await getSemestersAPI();
+    setSemesters(response.data.items);
+  };
+
+  const fetchMajor = async () => {
+    const response = await getMajorsAPI();
+    setMajors(response.data.items);
+  };
 
   const fetchProgramRequirements = async () => {
     try {
@@ -47,7 +68,7 @@ function DegreeAuditManagement() {
   const fetchBatchProgress = async () => {
     try {
       const response = await getBatchProgressAPI(selectedYear, selectedProgram, selectedTerm);
-      setBatchProgress(response.data);
+      setBatchProgress(Array.isArray(response.data) ? response.data : response.data.items || []);
     } catch (error) {
       console.error('Error fetching batch progress:', error);
       toast.error('Không thể tải tiến độ theo khóa');
@@ -113,21 +134,11 @@ function DegreeAuditManagement() {
             onChange={(e) => setSelectedProgram(e.target.value)}
           >
             <option value="">Chọn ngành học...</option>
-            <option value="CS">Khoa học máy tính</option>
-            <option value="SE">Kỹ thuật phần mềm</option>
-            <option value="IS">Hệ thống thông tin</option>
-          </select>
-
-          <select 
-            className="select select-bordered w-full"
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(e.target.value)}
-          >
-            <option value="">Chọn năm...</option>
-            {[2023, 2024, 2025].map(year => (
-              <option key={year} value={year}>{year}</option>
+            {majors.map(major => (
+              <option key={major.id} value={major.id}>{major.majorName}</option>
             ))}
           </select>
+
 
           <select 
             className="select select-bordered w-full"
@@ -135,9 +146,9 @@ function DegreeAuditManagement() {
             onChange={(e) => setSelectedTerm(e.target.value)}
           >
             <option value="">Chọn học kỳ...</option>
-            <option value="1">Học kỳ 1</option>
-            <option value="2">Học kỳ 2</option>
-            <option value="3">Học kỳ 3</option>
+            {semesters.map(semester => (
+              <option key={semester.id} value={semester.id}>{semester.semesterName}</option>
+            ))}
           </select>
         </div>
       </div>
@@ -157,104 +168,33 @@ function DegreeAuditManagement() {
             </button>
           </div>
 
-          <div className="space-y-6">
-            {/* Total Credits */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tổng số tín chỉ yêu cầu
-              </label>
-              <input
-                type="number"
-                className="input input-bordered w-full max-w-xs"
-                value={requirements.totalCredits}
-                onChange={(e) => setRequirements({
-                  ...requirements,
-                  totalCredits: parseInt(e.target.value)
-                })}
-              />
+          {/* Program Info */}
+          <div className="mb-6">
+            <div className="text-lg font-semibold">{requirements.majorName}</div>
+            <div className="text-sm text-gray-600">
+              Tổng số tín chỉ yêu cầu: <span className="font-bold">{requirements.requiredCredits}</span>
             </div>
-
-            {/* Categories */}
-            {requirements.categories.map((category, index) => (
-              <div key={index} className="border rounded-lg p-4">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-medium">{category.name}</h3>
-                  <button className="btn btn-ghost btn-sm">
-                    <FiEdit2 className="mr-2" />
-                    Chỉnh sửa
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Số tín chỉ yêu cầu
-                    </label>
-                    <input
-                      type="number"
-                      className="input input-bordered w-full"
-                      value={category.credits}
-                      onChange={(e) => {
-                        const newCategories = [...requirements.categories];
-                        newCategories[index].credits = parseInt(e.target.value);
-                        setRequirements({
-                          ...requirements,
-                          categories: newCategories
-                        });
-                      }}
-                    />
-                  </div>
-                </div>
-
-                {/* Course List */}
-                <table className="table w-full">
-                  <thead>
-                    <tr>
-                      <th>Mã môn</th>
-                      <th>Tên môn học</th>
-                      <th>Tín chỉ</th>
-                      <th>Bắt buộc</th>
-                      <th>Thao tác</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {category.courses.map((course, courseIndex) => (
-                      <tr key={courseIndex}>
-                        <td>{course.code}</td>
-                        <td>{course.name}</td>
-                        <td>{course.credits}</td>
-                        <td>
-                          <input
-                            type="checkbox"
-                            className="checkbox"
-                            checked={course.required}
-                            onChange={(e) => {
-                              const newCategories = [...requirements.categories];
-                              newCategories[index].courses[courseIndex].required = e.target.checked;
-                              setRequirements({
-                                ...requirements,
-                                categories: newCategories
-                              });
-                            }}
-                          />
-                        </td>
-                        <td>
-                          <button className="btn btn-ghost btn-xs">
-                            <FiEdit2 />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-
-                <button className="btn btn-ghost btn-sm mt-4">
-                  <FiPlus className="mr-2" />
-                  Thêm môn học
-                </button>
-              </div>
-            ))}
           </div>
+
+          {/* Course List */}
+          <table className="table w-full">
+            <thead>
+              <tr>
+                <th>Mã môn</th>
+                <th>Tên môn học</th>
+                <th>Tín chỉ</th>
+              </tr>
+            </thead>
+            <tbody>
+              {requirements.requirements.map((course, idx) => (
+                <tr key={course.courseId || idx}>
+                  <td>{course.courseCode}</td>
+                  <td>{course.courseName}</td>
+                  <td>{course.credits}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 
@@ -273,7 +213,7 @@ function DegreeAuditManagement() {
             </tr>
           </thead>
           <tbody>
-            {batchProgress.map((batch) => (
+            {(Array.isArray(batchProgress) ? batchProgress : []).map((batch) => (
               <tr key={batch.batchYear}>
                 <td>{batch.batchYear}</td>
                 <td>{batch.totalStudents}</td>

@@ -31,8 +31,8 @@ export const submitMidtermEvaluationAPI = async (data) => {
   return await authorizedAxiosInstance.post(`${BASE_URL}/CourseEvaluations/midterm`, data);
 };
 
-export const getStudentMidtermEvaluationsAPI = async (studentId) => {
-  return await authorizedAxiosInstance.get(`${BASE_URL}/CourseEvaluations/midterm/student/${studentId}`);
+export const getStudentMidtermEvaluationsAPI = async () => {
+  return await authorizedAxiosInstance.get(`${BASE_URL}/MidtermEvaluations/student`);
 };
 
 export const getProfessorMidtermEvaluationsAPI = async (classId) => {
@@ -114,3 +114,5 @@ export const exportProfessorSummaryAPI = async (semesterId) => {
     responseType: 'blob'
   });
 };
+
+export const getCurrentEvaluationPeriodAPI = getCurrentEvaluationPeriod;

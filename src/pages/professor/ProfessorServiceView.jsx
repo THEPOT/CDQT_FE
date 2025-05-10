@@ -76,9 +76,6 @@ function ProfessorServiceView() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Trạng thái
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Thao tác
-              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -101,17 +98,7 @@ function ProfessorServiceView() {
                   Chờ xử lý
                 </span>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <button className="text-blue-600 hover:text-blue-900 mr-3">
-                  Xem chi tiết
-                </button>
-                <button className="text-green-600 hover:text-green-900 mr-3">
-                  Duyệt
-                </button>
-                <button className="text-red-600 hover:text-red-900">
-                  Từ chối
-                </button>
-              </td>
+
             </tr>
           </tbody>
         </table>

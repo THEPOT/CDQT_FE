@@ -47,7 +47,7 @@ function StudentEvaluationView() {
   const fetchEvaluations = async () => {
     try {
       setIsLoading(true);
-      const response = await getStudentMidtermEvaluationsAPI(user.id);
+      const response = await getStudentMidtermEvaluationsAPI();
       setEvaluations(response.data);
     } catch (error) {
       console.error('Error fetching evaluations:', error);

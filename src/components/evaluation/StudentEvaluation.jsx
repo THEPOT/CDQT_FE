@@ -4,7 +4,8 @@ import { toast } from 'react-toastify';
 import {
   getEvaluationQuestionsAPI,
   submitCourseEvaluationAPI,
-  getStudentEvaluationStatusAPI
+  getStudentEvaluationStatusAPI,
+  getCurrentEvaluationPeriodAPI
 } from '../../apis/evaluationAPI';
 
 function StudentEvaluation() {
@@ -19,11 +20,30 @@ function StudentEvaluation() {
   });
   const [feedback, setFeedback] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [currentSemesterId, setCurrentSemesterId] = useState(null);
 
   useEffect(() => {
     fetchQuestions();
-    fetchEvaluationStatus();
+    fetchCurrentEvaluationPeriod();
   }, []);
+
+  const fetchCurrentEvaluationPeriod = async () => {
+    try {
+      const res = await getCurrentEvaluationPeriodAPI();
+      const data = res.data;
+      if (data && data.semesterId) {
+        setCurrentSemesterId(data.semesterId);
+        fetchEvaluationStatus(data.semesterId);
+      } else {
+        setCurrentSemesterId(null);
+        setEvaluationStatus(null);
+      }
+    } catch (error) {
+      console.error('Error fetching current evaluation period:', error);
+      setCurrentSemesterId(null);
+      setEvaluationStatus(null);
+    }
+  };
 
   const fetchQuestions = async () => {
     try {
@@ -35,10 +55,10 @@ function StudentEvaluation() {
     }
   };
 
-  const fetchEvaluationStatus = async () => {
+  const fetchEvaluationStatus = async (semesterId) => {
+    if (!semesterId) return;
     try {
-      const currentSemesterId = '2024-1'; // Replace with actual semester ID
-      const response = await getStudentEvaluationStatusAPI(currentSemesterId);
+      const response = await getStudentEvaluationStatusAPI(semesterId);
       setEvaluationStatus(response.data);
     } catch (error) {
       console.error('Error fetching evaluation status:', error);
@@ -69,7 +89,7 @@ function StudentEvaluation() {
         overallSatisfactionRating: 0
       });
       setFeedback('');
-      fetchEvaluationStatus();
+      fetchEvaluationStatus(currentSemesterId);
     } catch (error) {
       console.error('Error submitting evaluation:', error);
       toast.error('Không thể gửi đánh giá');

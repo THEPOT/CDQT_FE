@@ -23,8 +23,8 @@ export const getBatchProgressAPI = async (year, programCode, term) => {
   };
 
 // Get student progress
-export const getStudentProgressAPI = async (studentId) => {
-  return await authorizedAxiosInstance.get(`${BASE_URL}/DegreeAudits/students/${studentId}/progress`);
+export const getStudentProgressAPI = async () => {
+  return await authorizedAxiosInstance.get(`${BASE_URL}/DegreeAudits/students/progress`);
 };
 
 // Export audit report

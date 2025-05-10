@@ -1,64 +1,73 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiDownload, FiCheckCircle, FiClock } from 'react-icons/fi';
+import { getStudentProgressAPI } from '../../apis/degreeAuditAPI';
+import { toast } from 'react-toastify';
 
 function DegreeAudit() {
-  const [selectedCategory, setSelectedCategory] = useState('all');
-
-  const auditData = {
+  const [isLoading, setIsLoading] = useState(false);
+  const [auditData, setAuditData] = useState({
     student: {
-      name: 'Nguyễn Văn A',
-      id: '2023001',
-      program: 'Khoa học máy tính',
-      admissionYear: 2023,
-      expectedGraduation: 2027,
-      totalCredits: 90,
-      requiredCredits: 130,
-      gpa: 3.65
+      name: '',
+      id: '',
+      program: '',
+      admissionYear: null,
+      expectedGraduation: null,
+      totalCredits: 0,
+      requiredCredits: 0,
+      gpa: 0
     },
-    categories: [
-      {
-        name: 'Kiến thức đại cương',
-        completed: 30,
-        required: 35,
-        courses: [
-          {
-            code: 'MTH101',
-            name: 'Giải tích 1',
-            credits: 4,
-            status: 'completed',
-            grade: 'A'
-          },
-          {
-            code: 'PHY101',
-            name: 'Vật lý đại cương',
-            credits: 3,
-            status: 'in_progress'
-          }
-        ]
-      },
-      {
-        name: 'Kiến thức cơ sở ngành',
-        completed: 40,
-        required: 45,
-        courses: [
-          {
-            code: 'CS101',
-            name: 'Nhập môn lập trình',
-            credits: 3,
-            status: 'completed',
-            grade: 'A'
-          },
-          {
-            code: 'CS102',
-            name: 'Cấu trúc dữ liệu',
-            credits: 4,
-            status: 'completed',
-            grade: 'B+'
-          }
-        ]
-      }
-    ]
+    categories: []
+  });
+
+  useEffect(() => {
+    fetchAuditData();
+  }, []);
+
+  const fetchAuditData = async () => {
+    try {
+      setIsLoading(true);
+      const response = await getStudentProgressAPI();
+      const data = response.data;
+
+      setAuditData({
+        student: {
+          name: data.studentName,
+          id: data.studentId,
+          program: data.programName,
+          admissionYear: data.admissionYear,
+          expectedGraduation: data.expectedGraduationYear,
+          totalCredits: data.completedCredits,
+          requiredCredits: data.requiredCredits,
+          gpa: data.cumulativeGpa
+        },
+        categories: data.categories.map(cat => ({
+          name: cat.categoryName,
+          completed: cat.completedCredits,
+          required: cat.requiredCredits,
+          courses: cat.courses.map(course => ({
+            code: course.courseCode,
+            name: course.courseName,
+            credits: course.credits,
+            status: course.status,
+            grade: course.grade
+          }))
+        }))
+      });
+    } catch (error) {
+      console.error('Error fetching audit data:', error);
+      toast.error('Không thể tải dữ liệu tiến độ học tập');
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -77,9 +86,9 @@ function DegreeAudit() {
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="md:col-span-3 space-y-6">
-          {auditData.categories.map((category) => (
+          {auditData.categories.map((category, catIdx) => (
             <div
-              key={category.name}
+              key={category.name || catIdx}
               className="bg-white rounded-xl shadow-sm"
             >
               <div className="p-6 border-b border-gray-200">
@@ -125,35 +134,43 @@ function DegreeAudit() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {category.courses.map((course) => (
-                      <tr key={course.code}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {course.code}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {course.name}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {course.credits}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {course.status === 'completed' ? (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              <FiCheckCircle className="mr-1" />
-                              Đã hoàn thành
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                              <FiClock className="mr-1" />
-                              Đang học
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {course.grade || '-'}
+                    {category.courses.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="text-center text-gray-400 py-4">
+                          Không có môn học nào trong nhóm này
                         </td>
                       </tr>
-                    ))}
+                    ) : (
+                      category.courses.map((course, courseIdx) => (
+                        <tr key={`${category.name || catIdx}-${course.code || courseIdx}`}>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {course.code}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {course.name}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {course.credits}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {course.status === 'completed' ? (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <FiCheckCircle className="mr-1" />
+                                Đã hoàn thành
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                <FiClock className="mr-1" />
+                                Đang học
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {course.grade || '-'}
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -188,7 +205,9 @@ function DegreeAudit() {
               <div>
                 <p className="text-sm text-gray-500">GPA Tích lũy</p>
                 <p className="text-3xl font-bold text-blue-600">
-                  {auditData.student.gpa}
+                  {typeof auditData.student.gpa === 'number' && !isNaN(auditData.student.gpa)
+                    ? auditData.student.gpa.toFixed(2)
+                    : '-'}
                 </p>
               </div>
 

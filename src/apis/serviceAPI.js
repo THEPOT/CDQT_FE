@@ -6,6 +6,11 @@ export const getServiceRequestsAPI = async (params) => {
   return await authorizedAxiosInstance.get(`${BASE_URL}/ServiceRequests`, { params });
 };
 
+// Get service requests by student ID
+export const getServiceRequestsByStudentIdAPI = async () => {
+  return await authorizedAxiosInstance.get(`${BASE_URL}/ServiceRequests/student`);
+};
+
 // Get service request by id
 export const getServiceRequestByIdAPI = async (id) => {
   return await authorizedAxiosInstance.get(`${BASE_URL}/ServiceRequests/${id}`);

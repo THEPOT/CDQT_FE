@@ -18,7 +18,7 @@ import Services from './pages/Services';
 import CourseEvaluation from './components/evaluation/CourseEvaluation';
 import CourseManagement from './pages/admin/CourseManagement';
 import Settings from './pages/Settings';
-import ClassManagement from './components/teacher/ClassManagement';
+import TeachingSchedule from './components/teacher/TeachingSchedule.jsx';
 import GradeManagement from './components/teacher/GradeManagement';
 import RequestManagement from './components/staff/RequestManagement';
 import TermManagement from './pages/staff/TermManagement/TermManagement';
@@ -91,7 +91,7 @@ function App() {
             
             {/* Teacher Routes */}
             <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
-            <Route path="/my-classes" element={<ClassManagement />} />
+            <Route path="/my-classes" element={<TeachingSchedule />} />
             <Route path="/grade-management" element={<GradeManagement />} />
             <Route path="/courses" element={<CourseManagementProfessor />} />
             <Route path="/professor-services" element={<ProfessorServiceView />} />

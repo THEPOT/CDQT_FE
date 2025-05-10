@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { RiSendPlane2Line, RiAttachmentLine, RiFileTextLine, RiCalendarLine } from 'react-icons/ri';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'react-toastify';
-import { createServiceRequestAPI, getServiceRequestsAPI } from '../apis/serviceAPI';
+import { createServiceRequestAPI, getServiceRequestsByStudentIdAPI } from '../apis/serviceAPI';
 
 function Services() {
   const { user } = useAuth();
@@ -18,8 +18,8 @@ function Services() {
 
   const fetchRequests = async () => {
     try {
-      const response = await getServiceRequestsAPI({ studentId: user.id });
-      setRequests(response.data);
+      const response = await getServiceRequestsByStudentIdAPI();
+      setRequests(response.data.items);
     } catch (error) {
       console.error('Error fetching requests:', error);
       toast.error('Không thể tải danh sách yêu cầu');
